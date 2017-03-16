@@ -1,9 +1,9 @@
 # RAS-server
 
-[![Latest Stable Version](https://poser.pugx.org/slim/router/v/stable)](https://packagist.org/packages/slim/router)
-[![Total Downloads](https://poser.pugx.org/slim/router/downloads)](https://packagist.org/packages/slim/router)
-[![Latest Unstable Version](https://poser.pugx.org/slim/router/v/unstable)](https://packagist.org/packages/slim/router)
-[![License](https://poser.pugx.org/slim/router/license)](https://packagist.org/packages/slim/router)
+[![Latest Stable Version](https://poser.pugx.org/router/slim/v/stable)](https://packagist.org/packages/router/slim)
+[![Total Downloads](https://poser.pugx.org/router/slim/downloads)](https://packagist.org/packages/router/slim)
+[![Latest Unstable Version](https://poser.pugx.org/router/slim/v/unstable)](https://packagist.org/packages/router/slim)
+[![License](https://poser.pugx.org/router/slim/license)](https://packagist.org/packages/router/slim)
 
 RAS application with Slim Framework
 
