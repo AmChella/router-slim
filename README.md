@@ -1,4 +1,4 @@
-# RAS-server
+# Slim-Router
 
 [![Latest Stable Version](https://poser.pugx.org/router/slim/v/stable)](https://packagist.org/packages/router/slim)
 [![Total Downloads](https://poser.pugx.org/router/slim/downloads)](https://packagist.org/packages/router/slim)
