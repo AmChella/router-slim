@@ -17,7 +17,7 @@ class Container {
         array_push($this->application, [
             'routes' => $routes, 'cors' => $cors, 'object' => $instances
             ]);
-        $this->initialize($this->application);
+        return $this->initialize($this->application);
     }
 
     private function initialize($a) {
