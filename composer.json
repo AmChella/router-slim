@@ -1,7 +1,7 @@
 {
     "name": "router/slim",
     "description": "Slim Router",
-    "version": "master",
+    "version": "v0.0.1",
     "type": "application",
     "keywords": ["slim", "router", "framework"],
     "homepage": "https://github.com/AmChella/router-slim",
