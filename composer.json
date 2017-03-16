@@ -1,10 +1,10 @@
 {
-    "name": "slim/router",
+    "name": "router/slim",
     "description": "Slim Router",
     "version": "master",
     "type": "application",
     "keywords": ["slim", "router", "framework"],
-    "homepage": "https://github.com/AmChella/slim-router",
+    "homepage": "https://github.com/AmChella/router-slim",
     "license": "MIT",
     "authors": [
         {
