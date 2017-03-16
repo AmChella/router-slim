@@ -5,7 +5,7 @@
 [![Latest Unstable Version](https://poser.pugx.org/router/slim/v/unstable)](https://packagist.org/packages/router/slim)
 [![License](https://poser.pugx.org/router/slim/license)](https://packagist.org/packages/router/slim)
 
-ras application with Slim Framework
+application with Slim Framework
 
 ### Installation
 
