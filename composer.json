@@ -1,0 +1,20 @@
+{
+    "name": "slim/router",
+    "description": "Slim Router",
+    "version": "master",
+    "type": "application",
+    "keywords": ["slim", "router", "framework"],
+    "homepage": "https://github.com/AmChella/slim-router",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chella S",
+            "email": "2chellaa@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+       "php": ">=7.0",
+        "slim/slim": "3.7.0"
+    }
+}
