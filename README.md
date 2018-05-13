@@ -11,6 +11,11 @@ application with Slim Framework
 
 Use [Composer](https://getcomposer.org/)
 
+### Require as
+```
+composer require router/slim
+```
+
 ### Create routes as below
 ```
 -
