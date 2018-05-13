@@ -9,11 +9,12 @@ use Cs\Router\Util\Assert;
 class RequestHandler {
     protected $routes;
     protected $app;
+    protected $containers;
 
     public function mapRoutes():void {
         $routes = $this->routes;
-        $this->initializeRoutes($routes);
-        foreach ($routes as $route) {
+        $validRoutes = $this->initializeRoutes($routes);
+        foreach ($validRoutes as $route) {
             $this->mapRequestToService($route);
         }
     }
@@ -51,17 +52,17 @@ class RequestHandler {
         }
     }
 
-    private function mapRequestToService(Array $map, $slim) {
+    private function mapRequestToService(Array $map) {
         $instance = $this;
         $callable = function (Request $request, Response $response, $args)
          use ($map, $instance) {
             $args = call_user_func([$instance, 'getInput'], $request, $args);
-            $result = call_user_func([$instance->app[$map['service']], $map['func']], $args);
+            $result = call_user_func([$instance->containers[$map['service']], $map['func']], $args);
             return call_user_func([$instance, 'mapResponse'], $response, $result);
         };
 
         $pattern = $map['url'];
-        $slim->map([$map['method']], $pattern, $callable);
+        $this->app->map([$map['method']], $pattern, $callable);
     }
 
     public function getInput($request, $args) {
@@ -92,6 +93,12 @@ class RequestHandler {
     }
 
     private function mapResponse($response, $result) {
-        return $this->responseHandler->setResponse($response, $result);
+        $message = $result ?? 'found.no.response';
+        $status = $result['status'] ?? 'success';
+        $info = [
+            'status' => $status,
+            'message' => $message
+        ];
+        return $response->withJson($info);
     }
 }

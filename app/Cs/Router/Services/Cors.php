@@ -126,7 +126,7 @@ class Cors {
     }
 
     public static function routeMiddleware($settings = array()) {
-        $cors = new CorsSlim($settings);
+        $cors = new Cors($settings);
         return $cors;
     }
 }

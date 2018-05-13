@@ -9,8 +9,9 @@ use Cs\Router\Util\Assert;
 use \Slim\App as Slim;
 
 class App extends RequestHandler {
-    public function __construct(Slim $slim, $routes, $cors = []) {
+    public function __construct(Slim $slim, Pimple $container, $routes, $cors = []) {
         $this->app = $slim;
+        $this->containers = $container;
         Assert::arrayNotEmpty($routes, 'routes.must.have.array');
         $this->routes = $routes;
         if (count($cors) > 0) {
