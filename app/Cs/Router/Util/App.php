@@ -1,11 +1,11 @@
 <?php
-namespace Slimple\Slim\Util;
+namespace Cs\Router\Util;
 
 use \Exception;
 use Pimple\Container as Pimple;
-use app\Slim\Service\Router;
+use Cs\Router\Service\Router;
 
-class Container {
+class App {
     private $application;
 
     public function __construct(Array $routes, Pimple $instances, $cors = []) {

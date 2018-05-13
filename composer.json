@@ -14,12 +14,13 @@
         }
     ],
     "require": {
-       "php": ">=7.0",
+       "php": ">=7.1",
         "slim/slim": "^3"
     },
     "autoload": {
-        "psr-4": {
-            "Slimple\\Router\\": "app/Slim/"
+        "psr-0": {
+            "Cs\\Router\\Services": "app/",
+            "Cs\\Router\\Util": "app/"
         }
     }
 }

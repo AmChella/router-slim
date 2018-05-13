@@ -1,5 +1,5 @@
 <?php
-namespace Slimple\Slim\Service;
+namespace Cs\Router\Service;
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 class Cors {

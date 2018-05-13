@@ -1,9 +1,9 @@
 <?php
-namespace Slimple\Slim\Service;
+namespace Cs\Router\Service;
 
 use Pimple\Container as Pimple;
 use Slim\App as SlimApplication;
-use app\Slim\Service\Cors;
+use Cs\Router\Service\Cors;
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
