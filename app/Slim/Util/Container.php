@@ -1,5 +1,5 @@
 <?php
-namespace Tnq\Slim\Util;
+namespace Slimple\Slim\Util;
 
 use \Exception;
 use Pimple\Container as Pimple;

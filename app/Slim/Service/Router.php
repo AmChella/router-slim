@@ -1,5 +1,5 @@
 <?php
-namespace app\Slim\Controller;
+namespace Slimple\Slim\Service;
 
 use Pimple\Container as Pimple;
 use Slim\App as SlimApplication;

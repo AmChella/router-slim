@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Chella\\Router\\": "app/Slim/"
+            "Slimple\\Router\\": "app/Slim/"
         }
     }
 }
