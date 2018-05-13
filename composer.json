@@ -20,7 +20,8 @@
     "autoload": {
         "psr-0": {
             "Cs\\Router\\Services": "app/",
-            "Cs\\Router\\Util": "app/"
+            "Cs\\Router\\Util": "app/",
+            "Cs\\Router\\Exception": "app/"
         }
     }
 }

@@ -3,83 +3,31 @@ namespace Cs\Router\Util;
 
 use \Exception;
 use Pimple\Container as Pimple;
-use Cs\Router\Service\Router;
+use Cs\Router\Service\Cors;
+use Cs\Router\Service\RequestHandler;
 
-class App {
-    private $application;
+class App extends RequestHandler {    
+    private $reqHandler;
+    private $app;
 
-    public function __construct(Array $routes, Pimple $instances, $cors = []) {
-        $this->application = [];
-        if (empty($routes) === true) {
-            throw new Exception('routes.value.is.empty');
+    public function __construct(SlimApplication $slim, $routes, $cors = []) {
+        $this->app = $slim;
+        if (count($cors) > 0) {
+            $this->setCors($cors);
         }
 
-        array_push($this->application, [
-            'routes' => $routes, 'cors' => $cors, 'object' => $instances
-            ]);
-        return $this->initialize($this->application);
+        $this->processRequest();
     }
 
-    private function initialize($a) {
-
-        $a['router'] = function($c) use($a) {
-            return new router($a);
-        };
-
-        $a['requestHandler'] = function($c) use($a) {
-            return new RequestHandler($a);
-        };
-
-        $a['cors'] = function ($c) use ($a) {
-            $corsValues = $a['corsHandler'];
-            $allowedOrigin = $this->getAllowedOrigin(
-                $corsValues['origin']
-            );
-
-            $corsOptions = [
-                'origin' => $allowedOrigin,
-                'allowHeaders' => $corsValues['accept_headers'],
-                'allowCredentials',  $corsValues['allow_credentials']
-            ];
-
-            return $corsOptions;
-        };
-
-        $a['corsHandler'] = function () use ($a) {
-            $hasCrossOrigin = array_key_exists('cors', $a['cors']);
-            if (empty($hasCrossOrigin) === true) {
-                return [
-                    'origin' => '*',
-                    'allowCredentials' => 'false',
-                    'aollowHeaders' => 'Content-Type, X-Requested-With',
-                ];
-            }
-
-            return $a['cors'];
-        };
-
-        return $a;
+    public function processRequest() {
+        $this->mapRoutes();
     }
 
-    private function getOriginHeader() {
-        if (isset($_SERVER['HTTP_ORIGIN'])) {
-            return $_SERVER['HTTP_ORIGIN'];
-        }
-        return null;
+    private function setCors($cors) {
+        $this->app->add(Cors::routeMiddleware($cors));
     }
 
-    private function getAllowedOrigin($allowedOriginList) {
-        $originHeader = $this->getOriginHeader();
-        if (empty($originHeader) ) {
-            return null;
-        }
-
-        $matchedKey = array_search($originHeader, $allowedOriginList);
-        if ($matchedKey >= 0) {
-            $matchedOrigin = $allowedOriginList[$matchedKey];
-            return $matchedOrigin;
-        }
-
-        return null;
+    public function run() {
+        $this->app->run();
     }
 }

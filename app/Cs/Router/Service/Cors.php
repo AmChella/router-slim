@@ -7,9 +7,9 @@ class Cors {
 
     public function __construct($settings = array()) {
         $this->settings = array_merge(array(
-                'origin' => '*',    // Wide Open!
-                'allowMethods' => 'GET,HEAD,PUT,POST,DELETE'
-                ), $settings);
+            'origin' => '*',    // Wide Open!
+            'allowMethods' => 'GET,HEAD,PUT,POST,DELETE'
+        ), $settings);
     }
 
     protected function setOrigin($req, $rsp) {
@@ -17,8 +17,8 @@ class Cors {
         if (is_callable($origin)) {
             // Call origin callback with request origin
             $origin = call_user_func($origin,
-                                    $req->getHeader("Origin")
-                                    );
+                $req->getHeader("Origin")
+            );
         }
 
         // handle multiple allowed origins
