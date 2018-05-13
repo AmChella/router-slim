@@ -1,5 +1,5 @@
 <?php
-namespace Cs\Router\Service;
+namespace Cs\Router\Services;
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 class Cors {

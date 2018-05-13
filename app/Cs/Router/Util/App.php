@@ -3,15 +3,16 @@ namespace Cs\Router\Util;
 
 use \Exception;
 use Pimple\Container as Pimple;
-use Cs\Router\Service\Cors;
-use Cs\Router\Service\RequestHandler;
+use Cs\Router\Services\Cors;
+use Cs\Router\Services\RequestHandler;
+use Cs\Router\Util\Assert;
+use \Slim\App as Slim;
 
-class App extends RequestHandler {    
-    private $reqHandler;
-    private $app;
-
-    public function __construct(SlimApplication $slim, $routes, $cors = []) {
+class App extends RequestHandler {
+    public function __construct(Slim $slim, $routes, $cors = []) {
         $this->app = $slim;
+        Assert::arrayNotEmpty($routes, 'routes.must.have.array');
+        $this->routes = $routes;
         if (count($cors) > 0) {
             $this->setCors($cors);
         }

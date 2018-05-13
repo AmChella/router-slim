@@ -1,5 +1,5 @@
 <?php
-namespace Cs\Router\Service;
+namespace Cs\Router\Services;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -24,7 +24,7 @@ class RequestHandler {
         $validRoutes = [];
         $this->hasValidRoutes($r);
         foreach ($routes as $route) {
-            $map['url'] = $route['url'];
+            $map['url'] = $route['uri'];
             list($service, $func) = explode("->", $route['invoke']);
             $map['method'] = $route['method'];
             $map['service'] = $service;
@@ -38,6 +38,7 @@ class RequestHandler {
     private function hasValidRoutes($routing):void {
         $routes = $routing;
         foreach ($routes as $route) {
+            Assert::isHashArray($route, 'each.route.must.have.array');
             $this->hasImpliesOperator($route['invoke']);
         }
     }
@@ -45,8 +46,8 @@ class RequestHandler {
     private function hasImpliesOperator($r): void {
         Assert::notEmpty($r, 'invoke.param.not.found.in.route');
 
-        if (!preg_match('/[a-zA-Z]{5,15}(->)[a-zA-Z]{5,}/', $r)) {
-            throw new InvalidRoutes('routing.uri.path.invalid');
+        if (!preg_match('/[a-zA-Z]{3,15}(->)[a-zA-Z]{5,}/', $r)) {
+            throw new InvalidRoutes('invoke.route.is.invalid');
         }
     }
 
