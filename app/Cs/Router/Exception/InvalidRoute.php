@@ -3,6 +3,6 @@ namespace Cs\Router\Exception;
 
 use \Exception;
 
-class RouteException extends Exception {
+class InvalidRoute extends Exception {
 
 }

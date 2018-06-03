@@ -6,93 +6,79 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Cs\Router\Exception\RouteException;
 use Cs\Router\Util\Assert;
 
-class RequestHandler {
+class RequestHandler extends Assert {
     protected $routes;
     protected $app;
     protected $containers;
 
-    public function mapRoutes():void 
+    public function assignRoutesToService(): void 
     {
         $routes = $this->routes;
-        $validRoutes = $this->initializeRoutes($routes);
-        foreach ($validRoutes as $route) {
-            $this->mapRequestToService($route);
-        }
-    }
-
-    private function initializeRoutes($routes): array 
-    {
-        $map = [];
-        $validRoutes = [];
-        $this->hasValidRoutes($routes);
         foreach ($routes as $route) {
+            $this->isValid($route);
             $map['url'] = $route['uri'];
             list($service, $func) = explode("->", $route['invoke']);
             $map['method'] = $route['method'];
             $map['service'] = $service;
             $map['func'] = $func;
-            array_push($validRoutes, $map);
+            $this->assignService($map);
         }
-
-        return $validRoutes;
     }
 
-    private function hasValidRoutes($routing): void 
+    private function isValid(Array $route): void 
     {
-        $routes = $routing;
-        foreach ($routes as $route) {
-            Assert::isHashArray($route, 'each.route.must.have.array');
-            $this->hasImpliesOperator($route['invoke']);
+        $this->isHashArray($route, 'each.route.must.have.array');
+        $this->isArrayKeyExist('invoke', $route, 'invoke.is.not.found.in.route');
+        $this->isArrayKeyExist('uri', $route, 'uri.is.not.found');
+        $this->isArrayKeyExist('method', $route, 'method.is.not.found');
+        if (!preg_match('/[a-zA-Z]{3,15}(->)[a-zA-Z]{5,}/', $route['invoke'])) {
+            throw new InvalidRoute('invoke.route.is.invalid');
         }
+        
+        list($service, $func) = explode("->", $route['invoke']);
+        $this->isInvokeHasValidCallback($service, $func);
     }
 
-    private function hasImpliesOperator($route): void 
+    public function isInvokeHasValidCallback($class, $method): void 
     {
-        Assert::notEmpty($route, 'invoke.param.not.found.in.route');
-        if (!preg_match('/[a-zA-Z]{3,15}(->)[a-zA-Z]{5,}/', $route)) {
-            throw new RouteException('invoke.route.is.invalid');
-        }
+        $msg = sprintf('func.%s.is.not.found', $method);
+        $this->hasMethod($this->containers[$class], $method, $msg);
+        $msg = sprintf('func.%s.is.not.callable', $method);
+        $this->isCallable($this->containers[$class], $method, $msg);
     }
 
-    private function mapRequestToService(Array $map): void 
+    private function assignService(Array $map): void 
     {
         $instance = $this;
         $callable = function (
             Request $request, Response $response, $args
         ) use ($map, $instance) {
-            $args = call_user_func([$instance, 'getInput'], $request, $args);
+            $args = call_user_func([$instance, 'getPayload'], $request, $args);
             $result = call_user_func(
                 [$instance->containers[$map['service']], $map['func']], $args
             );
 
-            return call_user_func([$instance, 'mapResponse'], $response, $result);
+            return call_user_func([$instance, 'sendResponse'], $response, $result);
         };
 
         $pattern = $map['url'];
         $this->app->map([$map['method']], $pattern, $callable);
     }
 
-    public function getInput($request, $args): string 
+    public function getPayload($request, $args): string 
     {
-        if ($request->getMethod() === "POST") {
-            return $this->getPostInput($request);
+        if ($request->isPost() === true) {
+            return $request->getParsedBody();
         }
 
-        if ($request->getMethod() === "GET") {
-            return $this->getGetInput($request, $args);
+        if ($request->isGet() === true) {
+            return $this->getGetPayload($request, $args);
         }
 
         throw new Exception("invalid.request.method");
     }
 
-    private function getPostInput($request): string 
-    {
-        $input = $request->getParsedBody();
-        $input = is_string($input) === true ? json_decode($input, true) : $input;
-        return $input;
-    }
-
-    private function getGetInput($request, $args): string 
+    public function getGetPayload($request, $args): string 
     {
         if (is_array($args) === true && count($args) > 0) {
             return $args;
@@ -101,15 +87,15 @@ class RequestHandler {
         return $request->getQueryParams();
     }
 
-    private function mapResponse($response, $result): string 
+    public function sendResponse($response, $result): string 
     {
         $message = $result ?? 'found.no.response';
         $status = $result['status'] ?? 'success';
-        $info = [
+        $data = [
             'status' => $status,
             'message' => $message
         ];
 
-        return $response->withJson($info);
+        return $response->withJson($data);
     }
 }
