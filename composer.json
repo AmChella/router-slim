@@ -23,5 +23,8 @@
             "Cs\\Router\\Util": "app/",
             "Cs\\Router\\Exception": "app/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7"
     }
 }
