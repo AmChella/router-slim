@@ -8,6 +8,7 @@ abstract class Assert {
 
     public static function isNumber($number, $message): void 
     {
+        self::isEmpty($number, $message);
         if (preg_match('/[^0-9]/', $number)) {
             throw new Exception($message);
         }
