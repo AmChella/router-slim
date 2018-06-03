@@ -3,7 +3,7 @@ namespace Cs\Router\Services;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Cs\Router\Exception\InvalidRoutes;
+use Cs\Router\Exception\RouteException;
 use Cs\Router\Util\Assert;
 
 class RequestHandler {
@@ -11,7 +11,8 @@ class RequestHandler {
     protected $app;
     protected $containers;
 
-    public function mapRoutes():void {
+    public function mapRoutes():void 
+    {
         $routes = $this->routes;
         $validRoutes = $this->initializeRoutes($routes);
         foreach ($validRoutes as $route) {
@@ -19,11 +20,11 @@ class RequestHandler {
         }
     }
 
-    private function initializeRoutes($r) {
-        $routes = $r;
+    private function initializeRoutes($routes): array 
+    {
         $map = [];
         $validRoutes = [];
-        $this->hasValidRoutes($r);
+        $this->hasValidRoutes($routes);
         foreach ($routes as $route) {
             $map['url'] = $route['uri'];
             list($service, $func) = explode("->", $route['invoke']);
@@ -36,7 +37,8 @@ class RequestHandler {
         return $validRoutes;
     }
 
-    private function hasValidRoutes($routing):void {
+    private function hasValidRoutes($routing): void 
+    {
         $routes = $routing;
         foreach ($routes as $route) {
             Assert::isHashArray($route, 'each.route.must.have.array');
@@ -44,20 +46,25 @@ class RequestHandler {
         }
     }
 
-    private function hasImpliesOperator($r): void {
-        Assert::notEmpty($r, 'invoke.param.not.found.in.route');
-
-        if (!preg_match('/[a-zA-Z]{3,15}(->)[a-zA-Z]{5,}/', $r)) {
-            throw new InvalidRoutes('invoke.route.is.invalid');
+    private function hasImpliesOperator($route): void 
+    {
+        Assert::notEmpty($route, 'invoke.param.not.found.in.route');
+        if (!preg_match('/[a-zA-Z]{3,15}(->)[a-zA-Z]{5,}/', $route)) {
+            throw new RouteException('invoke.route.is.invalid');
         }
     }
 
-    private function mapRequestToService(Array $map) {
+    private function mapRequestToService(Array $map): void 
+    {
         $instance = $this;
-        $callable = function (Request $request, Response $response, $args)
-         use ($map, $instance) {
+        $callable = function (
+            Request $request, Response $response, $args
+        ) use ($map, $instance) {
             $args = call_user_func([$instance, 'getInput'], $request, $args);
-            $result = call_user_func([$instance->containers[$map['service']], $map['func']], $args);
+            $result = call_user_func(
+                [$instance->containers[$map['service']], $map['func']], $args
+            );
+
             return call_user_func([$instance, 'mapResponse'], $response, $result);
         };
 
@@ -65,8 +72,8 @@ class RequestHandler {
         $this->app->map([$map['method']], $pattern, $callable);
     }
 
-    public function getInput($request, $args) {
-        $input = [];
+    public function getInput($request, $args): string 
+    {
         if ($request->getMethod() === "POST") {
             return $this->getPostInput($request);
         }
@@ -78,13 +85,15 @@ class RequestHandler {
         throw new Exception("invalid.request.method");
     }
 
-    private function getPostInput($request) {
+    private function getPostInput($request): string 
+    {
         $input = $request->getParsedBody();
         $input = is_string($input) === true ? json_decode($input, true) : $input;
         return $input;
     }
 
-    private function getGetInput($request, $args) {
+    private function getGetInput($request, $args): string 
+    {
         if (is_array($args) === true && count($args) > 0) {
             return $args;
         }
@@ -92,13 +101,15 @@ class RequestHandler {
         return $request->getQueryParams();
     }
 
-    private function mapResponse($response, $result) {
+    private function mapResponse($response, $result): string 
+    {
         $message = $result ?? 'found.no.response';
         $status = $result['status'] ?? 'success';
         $info = [
             'status' => $status,
             'message' => $message
         ];
+
         return $response->withJson($info);
     }
 }
