@@ -3,7 +3,7 @@ namespace Cs\Router\Services;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Cs\Router\Exception\RouteException;
+use Cs\Router\Exception\InvalidRoute;
 use Cs\Router\Util\Assert;
 
 class RequestHandler extends Assert {
