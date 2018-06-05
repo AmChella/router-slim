@@ -44,7 +44,7 @@ abstract class Assert {
         }
     }
     
-    public static function arrayKeyExists($array, $key, $message): void 
+    public static function arrayKeyExists($key, $array, $message): void 
     {
         self::isArray($array, $message);
         if (array_key_exists($key, $array) === false) {
@@ -62,12 +62,12 @@ abstract class Assert {
 
     public static function notNull($data, $message): void 
     {
-        if (is_null($data) === false) {
+        if (is_null($data) === true) {
             throw new Exception($message);
         }
     }
 
-    public static function notEmpty($data, $message): void 
+    public static function isEmpty($data, $message): void 
     {
         self::notNull($data, $message);
         self::isString($data, $message);
@@ -76,17 +76,14 @@ abstract class Assert {
         }
     }
 
-    public static function isEmpty($data, $message): void 
-    {
-        self::isString($data, $message);
-        if (strlen($data) === 0) {
-            throw new Exception($message);
-        }
-    }
-
     public static function isJson($data, $message): void 
     {
-        if (is_null($data) === true || is_null(json_decode($data)) === true) {
+        if (is_null($data) === true) {
+            throw new Exception($message);
+        }
+
+        json_decode($data, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception($message);
         }
     }
