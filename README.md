@@ -11,12 +11,12 @@ application with Slim Framework
 
 Use [Composer](https://getcomposer.org/)
 
-### Require as
+### Do Composer Require as below
 ```
 composer require router/slim
 ```
 
-### Create routes as below
+### Create your app routes as below in a yaml
 ```
 -
   uri: /
@@ -27,7 +27,7 @@ composer require router/slim
   method: post|get
   invoke: [class]->[function]
 ```  
- ### Cors will have as below
+ ### Cors values
 ``` 
  cors:
     allow_credentials: 'true'
@@ -35,7 +35,7 @@ composer require router/slim
     origin:
         - http://domain.name.com
 ```
-### Create instance as below
+### Create instance
 ```
 use \Cs\Router\Util\App as Router;
 
@@ -44,3 +44,6 @@ new Router(
             $routes, $corsClosure -> optional
         );
 ```
+### Here you go
+
+Happy routing.
