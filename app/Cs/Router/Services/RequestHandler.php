@@ -11,7 +11,7 @@ class RequestHandler extends Assert {
     protected $app;
     protected $containers;
 
-    public function assignRoutesToService(): void 
+    public function assignRoutesToService(): void
     {
         $routes = $this->routes;
         foreach ($routes as $route) {
@@ -25,7 +25,7 @@ class RequestHandler extends Assert {
         }
     }
 
-    private function isValid(Array $route): void 
+    private function isValid(Array $route): void
     {
         $this->isHashArray($route, 'each.route.must.have.array');
         $this->isArrayKeyExist('invoke', $route, 'invoke.is.not.found.in.route');
@@ -34,12 +34,12 @@ class RequestHandler extends Assert {
         if (!preg_match('/[a-zA-Z]{3,15}(->)[a-zA-Z]{5,}/', $route['invoke'])) {
             throw new InvalidRoute('invoke.route.is.invalid');
         }
-        
+
         list($service, $func) = explode("->", $route['invoke']);
         $this->isInvokeHasValidCallback($service, $func);
     }
 
-    public function isInvokeHasValidCallback($class, $method): void 
+    public function isInvokeHasValidCallback($class, $method): void
     {
         $msg = sprintf('func.%s.is.not.found', $method);
         $this->hasMethod($this->containers[$class], $method, $msg);
@@ -47,7 +47,7 @@ class RequestHandler extends Assert {
         $this->isCallable($this->containers[$class], $method, $msg);
     }
 
-    private function assignService(Array $map): void 
+    private function assignService(Array $map): void
     {
         $instance = $this;
         $callable = function (
@@ -65,10 +65,21 @@ class RequestHandler extends Assert {
         $this->app->map([$map['method']], $pattern, $callable);
     }
 
-    public function getPayload($request, $args): string 
+    public function getPostData($req)
+    {
+        $postData = [];
+        $postData = $req->getParsedBody();
+        if (count($req->getUploadedFiles()) > 0) {
+            $postData['files'] = $req->getUploadedFiles();
+        }
+
+        return $postData;
+    }
+
+    public function getPayload($request, $args): string
     {
         if ($request->isPost() === true) {
-            return $request->getParsedBody();
+            return $this->getPostData($request);
         }
 
         if ($request->isGet() === true) {
@@ -78,7 +89,7 @@ class RequestHandler extends Assert {
         throw new Exception("invalid.request.method");
     }
 
-    public function getGetPayload($request, $args): string 
+    public function getGetPayload($request, $args): string
     {
         if (is_array($args) === true && count($args) > 0) {
             return $args;
@@ -87,7 +98,7 @@ class RequestHandler extends Assert {
         return $request->getQueryParams();
     }
 
-    public function sendResponse($response, $result): string 
+    public function sendResponse($response, $result): string
     {
         $message = $result ?? 'found.no.response';
         $status = $result['status'] ?? 'success';
