@@ -15,9 +15,10 @@ use \Slim\App as Slim;
  * @link http://url.com
  */
 
-class App extends RequestHandler {
-    public function __construct(Slim $slim, Pimple $container, $routes, $cors = []) 
-    {
+Class App extends RequestHandler {
+    public function __construct(
+        Slim $slim, Pimple $container, $routes, $cors = []
+    ) {
         $this->app = $slim;
         $this->containers = $container;
         $this->arrayNotEmpty($routes, 'routes.must.have.array');
@@ -26,14 +27,12 @@ class App extends RequestHandler {
             $this->setCors($cors);
         }
     }
-    
-    private function setCors($cors) 
-    {
+
+    private function setCors($cors): Void {
         $this->app->add(Cors::routeMiddleware($cors));
     }
 
-    public function run() 
-    {
+    public function run(): Void {
         $this->assignRoutesToService();
         $this->app->run();
     }

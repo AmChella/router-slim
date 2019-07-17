@@ -5,17 +5,15 @@ namespace Cs\Router\Services;
 class Cors {
     protected $settings;
 
-    public function __construct($settings = []) 
-    {
+    public function __construct($settings = []) {
         $this->settings = array_merge([
                 'origin' => '*',    // Wide Open!
-                'allowMethods' => 'GET,HEAD,PUT,POST,DELETE'
+                'allowMethods' => 'GET, HEAD, PUT, POST'
             ], $settings
         );
     }
 
-    protected function setOrigin($req, $rsp): Object 
-    {
+    protected function setOrigin($req, $rsp): Object {
         $origin = $this->settings['origin'];
         if (is_callable($origin) === true) {
             // Call origin callback with request origin
@@ -44,15 +42,14 @@ class Cors {
 
             if (is_null($origin) === true) {
                 // default to the first allowed origin
-                $origin = reset($allowedOrigins);                
+                $origin = reset($allowedOrigins);
             }
         }
 
         return $rsp->withHeader('Access-Control-Allow-Origin', $origin);
     }
 
-    protected function setExposeHeaders($req, $rsp): Object
-    {
+    protected function setExposeHeaders($req, $rsp): Object {
         if (isset($this->settings['exposeHeaders']) === true) {
             $rsp = $rsp->withAddedHeader(
                 'Access-Control-Expose-Headers', $this->settings['exposeHeaders']
@@ -61,9 +58,8 @@ class Cors {
 
         return $rsp;
     }
-    
-    protected function setMaxAge($req, $rsp) 
-    {
+
+    protected function setMaxAge($req, $rsp) {
         if (isset($this->settings['maxAge']) === true) {
             $rsp = $rsp->withHeader(
                 'Access-Control-Max-Age', $this->settings['maxAge']
@@ -73,10 +69,9 @@ class Cors {
         return $rsp;
     }
 
-    protected function setAllowCredentials($req, $rsp) 
-    {
+    protected function setAllowCredentials($req, $rsp) {
         if (
-            isset($this->settings['allowCredentials']) === true && 
+            isset($this->settings['allowCredentials']) === true &&
             $this->settings['allowCredentials'] === true
         ) {
             $rsp = $rsp->withHeader('Access-Control-Allow-Credentials', 'true');
@@ -85,8 +80,7 @@ class Cors {
         return $rsp;
     }
 
-    protected function setAllowMethods($req, $rsp) 
-    {
+    protected function setAllowMethods($req, $rsp) {
         if (isset($this->settings['allowMethods']) === true) {
             $rsp = $rsp->withHeader(
                 'Access-Control-Allow-Methods', $this->settings['allowMethods']
@@ -96,9 +90,8 @@ class Cors {
         return $rsp;
     }
 
-    protected function setAllowHeaders($req, $rsp) 
-    {
-        $allowHeaders = $this->settings['allowHeaders'] ?? 
+    protected function setAllowHeaders($req, $rsp) {
+        $allowHeaders = $this->settings['allowHeaders'] ??
         $req->getHeader("Access-Control-Request-Headers");
 
         if (isset($allowHeaders) === true) {
@@ -108,8 +101,7 @@ class Cors {
         return $rsp;
     }
 
-    protected function setCorsHeaders($req, $rsp): Object 
-    {
+    protected function setCorsHeaders($req, $rsp): Object {
         if ($req->isOptions() === true) {
             $rsp = $this->setOrigin($req, $rsp);
             $rsp = $this->setMaxAge($req, $rsp);
@@ -117,7 +109,7 @@ class Cors {
             $rsp = $this->setAllowMethods($req, $rsp);
             $rsp = $this->setAllowHeaders($req, $rsp);
             return $rsp;
-        } 
+        }
 
         $rsp = $this->setOrigin($req, $rsp);
         $rsp = $this->setExposeHeaders($req, $rsp);
@@ -126,8 +118,7 @@ class Cors {
         return $rsp;
     }
 
-    public function __invoke($request, $response, $next) 
-    {
+    public function __invoke($request, $response, $next) {
         $response = $this->setCorsHeaders($request, $response);
         if ($request->isOptions() === false) {
             $response = $next($request, $response);
@@ -136,9 +127,9 @@ class Cors {
         return $response;
     }
 
-    public static function routeMiddleware($settings = [])
-    {
+    public static function routeMiddleware($settings = []): Object {
         $cors = new Cors($settings);
+
         return $cors;
     }
 }
