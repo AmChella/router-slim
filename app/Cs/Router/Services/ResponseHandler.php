@@ -12,6 +12,8 @@ Class ResponseHandler extends Assert {
         if (isset($result['responseType']) === false) {
             return $this->respondAsJson($result);
         }
+
+        return $this->respondAsDownload($result);
     }
 
     public function respondAsJson($result) {
