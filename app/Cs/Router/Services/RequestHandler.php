@@ -75,7 +75,7 @@ class RequestHandler extends Assert {
     public function getFilesUploaded(Request $request): Array {
         $files = [];
         $item = [];
-        $uploadedFiles = $request->getFilesUploaded();
+        $uploadedFiles = $request->getUploadedFiles();
         foreach($uploadedFiles as $file) {
             $item['file'] = $file->getStream();
             $item['name'] = $file->getClientFilename();
