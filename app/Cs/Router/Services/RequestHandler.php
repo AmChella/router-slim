@@ -4,48 +4,47 @@ namespace Cs\Router\Services;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Cs\Router\Exception\InvalidRoute;
+use Cs\Router\Exception\InvalidMethodType;
 use Cs\Router\Util\Assert;
-use Slim\Http\UploadedFile;
 
 class RequestHandler extends Assert {
     protected $routes;
     protected $app;
     protected $containers;
 
-    public function assignRoutesToService(): Void {
-        $routes = $this->routes;
+    public function assignRoutesToService($routes): Void {
         foreach ($routes as $route) {
-            $this->isValid($route);
+            $this->validateRoute($route);
             $map['url'] = $route['uri'];
             list($service, $func) = explode("->", $route['invoke']);
             $map['method'] = $route['method'];
             $map['service'] = $service;
             $map['func'] = $func;
-            $this->assignService($map);
+            $this->assignCallback($map);
         }
     }
 
-    private function isValid(Array $route): Void {
-        $this->isHashArray($route, 'each.route.must.have.array');
-        $this->isArrayKeyExist('invoke', $route, 'invoke.is.not.found.in.route');
-        $this->isArrayKeyExist('uri', $route, 'uri.is.not.found');
-        $this->isArrayKeyExist('method', $route, 'method.is.not.found');
+    private function validateRoute(Array $route): Void {
+        $this->isHashArray($route, 'routes.not.an.array');
+        $this->isArrayKeyExist('invoke', $route, 'invoke.key.not.found');
+        $this->isArrayKeyExist('uri', $route, 'uri.not.found');
+        $this->isArrayKeyExist('method', $route, 'method.not.found');
         if (!preg_match('/[a-zA-Z]{3,15}(->)[a-zA-Z]{5,}/', $route['invoke'])) {
-            throw new InvalidRoute('invoke.route.is.invalid');
+            throw new InvalidRoute('route.uri.invalid');
         }
 
         list($service, $func) = explode("->", $route['invoke']);
-        $this->isInvokeHasValidCallback($service, $func);
+        $this->validateServiceHasValidCallback($service, $func);
     }
 
-    public function isInvokeHasValidCallback($class, $method): Void {
-        $msg = sprintf('func.%s.is.not.found', $method);
+    public function validateServiceHasValidCallback($class, $method): Void {
+        $msg = sprintf('func.%s.not.found', $method);
         $this->hasMethod($this->containers[$class], $method, $msg);
-        $msg = sprintf('func.%s.is.not.callable', $method);
+        $msg = sprintf('func.%s.not.callable', $method);
         $this->isCallable($this->containers[$class], $method, $msg);
     }
 
-    private function assignService(Array $map): Void {
+    private function assignCallback(Array $map): Void {
         $instance = $this;
         $callable = function (
             Request $request, Response $response, $args
@@ -55,7 +54,10 @@ class RequestHandler extends Assert {
                 [$instance->containers[$map['service']], $map['func']], $args
             );
 
-            return call_user_func([$instance, 'sendResponse'], $response, $result);
+            return call_user_func(
+                [$instance->responseHandler, 'setResponse'],
+                $response, $result
+            );
         };
 
         $pattern = $map['url'];
@@ -96,7 +98,7 @@ class RequestHandler extends Assert {
             return $this->getGetPayload($request, $args);
         }
 
-        throw new Exception("invalid.request.method");
+        throw new InvalidMethodType("invalid.http.method");
     }
 
     public function getGetPayload($request, $args): Array {
@@ -105,16 +107,5 @@ class RequestHandler extends Assert {
         }
 
         return $request->getQueryParams();
-    }
-
-    public function sendResponse($response, $result): String {
-        $message = $result ?? 'found.no.response';
-        $status = $result['status'] ?? 'success';
-        $data = [
-            'status' => $status,
-            'message' => $message
-        ];
-
-        return $response->withJson($data);
     }
 }

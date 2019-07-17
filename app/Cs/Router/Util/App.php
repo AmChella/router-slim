@@ -5,6 +5,7 @@ use \Exception;
 use Pimple\Container as Pimple;
 use Cs\Router\Services\Cors;
 use Cs\Router\Services\RequestHandler;
+use Cs\Router\Services\ResponseHandler;
 use \Slim\App as Slim;
 
 /**
@@ -16,16 +17,19 @@ use \Slim\App as Slim;
  */
 
 Class App extends RequestHandler {
+    private $responseHandler;
+
     public function __construct(
         Slim $slim, Pimple $container, $routes, $cors = []
     ) {
         $this->app = $slim;
         $this->containers = $container;
-        $this->arrayNotEmpty($routes, 'routes.must.have.array');
+        $this->arrayNotEmpty($routes, 'routes.should.be.an.array');
         $this->routes = $routes;
         if (count($cors) > 0) {
             $this->setCors($cors);
         }
+        $this->responseHandler = new ResponseHandler();
     }
 
     private function setCors($cors): Void {
@@ -33,7 +37,7 @@ Class App extends RequestHandler {
     }
 
     public function run(): Void {
-        $this->assignRoutesToService();
+        $this->assignRoutesToService($this->routes);
         $this->app->run();
     }
 }
