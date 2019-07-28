@@ -12,6 +12,13 @@ class RequestHandler extends Assert {
     protected $app;
     protected $containers;
 
+    /**
+     * assignRoutesToService
+     *
+     * @param  mixed $routes
+     *
+     * @return Void
+     */
     public function assignRoutesToService($routes): Void {
         foreach ($routes as $route) {
             $this->validateRoute($route);
@@ -20,11 +27,19 @@ class RequestHandler extends Assert {
             $map['method'] = $route['method'];
             $map['service'] = $service;
             $map['func'] = $func;
+            $map['return'] = $route['return'] ?? 'json';
             $this->assignCallback($map);
         }
     }
 
-    private function validateRoute(Array $route): Void {
+    /**
+     * validateRoute
+     *
+     * @param  mixed $route
+     *
+     * @return Void
+     */
+    public function validateRoute(Array $route): Void {
         $this->isHashArray($route, 'routes.not.an.array');
         $this->isArrayKeyExist('invoke', $route, 'invoke.key.not.found');
         $this->isArrayKeyExist('uri', $route, 'uri.not.found');
@@ -37,6 +52,14 @@ class RequestHandler extends Assert {
         $this->validateServiceHasValidCallback($service, $func);
     }
 
+    /**
+     * validateServiceHasValidCallback
+     *
+     * @param  mixed $class
+     * @param  mixed $method
+     *
+     * @return Void
+     */
     public function validateServiceHasValidCallback($class, $method): Void {
         $msg = sprintf('func.%s.not.found', $method);
         $this->hasMethod($this->containers[$class], $method, $msg);
@@ -44,6 +67,13 @@ class RequestHandler extends Assert {
         $this->isCallable($this->containers[$class], $method, $msg);
     }
 
+    /**
+     * assignCallback
+     *
+     * @param  mixed $map
+     *
+     * @return Void
+     */
     private function assignCallback(Array $map): Void {
         $instance = $this;
         $callable = function (
@@ -56,7 +86,7 @@ class RequestHandler extends Assert {
 
             return call_user_func(
                 [$instance->responseHandler, 'setResponse'],
-                $response, $result
+                $response, $result, $map['return'] ?? 'json'
             );
         };
 
@@ -64,6 +94,13 @@ class RequestHandler extends Assert {
         $this->app->map([$map['method']], $pattern, $callable);
     }
 
+    /**
+     * getPostData
+     *
+     * @param  mixed $req
+     *
+     * @return Array
+     */
     public function getPostData($req): Array {
         $postData = [];
         $postData = $req->getParsedBody();
@@ -74,6 +111,13 @@ class RequestHandler extends Assert {
         return $postData;
     }
 
+    /**
+     * getFilesUploaded
+     *
+     * @param  mixed $request
+     *
+     * @return Array
+     */
     public function getFilesUploaded(Request $request): Array {
         $files = [];
         $item = [];
@@ -89,6 +133,14 @@ class RequestHandler extends Assert {
         return $files;
     }
 
+    /**
+     * getPayload
+     *
+     * @param  mixed $request
+     * @param  mixed $args
+     *
+     * @return Array
+     */
     public function getPayload($request, $args): Array {
         if ($request->isPost() === true) {
             return $this->getPostData($request);
@@ -101,6 +153,14 @@ class RequestHandler extends Assert {
         throw new InvalidMethodType("invalid.http.method");
     }
 
+    /**
+     * getGetPayload
+     *
+     * @param  mixed $request
+     * @param  mixed $args
+     *
+     * @return Array
+     */
     public function getGetPayload($request, $args): Array {
         if (is_array($args) === true && count($args) > 0) {
             return $args;

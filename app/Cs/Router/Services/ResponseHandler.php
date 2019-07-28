@@ -7,31 +7,36 @@ use Cs\Router\Util\Assert;
 Class ResponseHandler extends Assert {
     private $responseHandler;
 
-    public function setResponse(Response $response, Array $result) {
-        $this->responseHandler = $response;
-        if (isset($result['responseType']) === false) {
-            return $this->respondAsJson($result);
+    public function setResponse(Response $response, Array $result, $type = 'json') {
+        $this->body = $response;
+        switch(strtolower($type)) {
+            case 'json':
+                return $this->jsonResponse($result);
+            case 'raw':
+                return $this->rawResponse($result);
+            case 'download':
+                return $this->downloadResponse($result);
+            default:
+                return $this->jsonResponse($result);
         }
-
-        return $this->respondAsDownload($result);
     }
 
-    public function respondAsJson($result) {
+    public function jsonResponse($result, $statusCode = 200) {
         $this->arrayNotEmpty($result, 'empty.result.given');
         $this->inArray('status', $result, 'result.does.not.have.status.key');
         $this->isBool($result['status'], 'result.status.is.not.a.boolean');
 
-        return $this->responseHandler->withJson($result);
+        return $this->body->withJson($result $statusCode);
     }
 
-    public function respondAsDownload($result) {
+    public function downloadResponse($result) {
         $this->inArray('file', $result, 'file.key.not.found');
         $this->isEmpty($result['file'], 'file.steam.not.found');
         $this->inArray('contentType', $result, 'contentType.not.found');
         $this->inArray('fileName', $result, 'fileName.not.found');
         $this->inArray('fileSize', $result, 'fileSize.not.found');
 
-        $response = $this->responseHandler
+        $response = $this->body
             ->withHeader('Content-Description', 'File Transfer')
             ->withHeader('Content-Type', $result['contentType'])
             ->withHeader(
@@ -45,5 +50,9 @@ Class ResponseHandler extends Assert {
 
             echo $result['file'];
         return $response;
+    }
+
+    public function rawResponse($result) {
+        return $this->body->write($result['data']);
     }
 }
