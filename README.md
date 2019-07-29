@@ -24,8 +24,17 @@ composer require router/slim
   invoke: [class]->[function]
 -
   uri: /pattern/pattern
-  method: post|get
+  method: post
   invoke: [class]->[function]
+  return: raw|json|download (default is json)
+    e.g
+      return -> raw
+        response should be array, `data` key is mandatory
+      return -> json
+        response should be array, `status` key is mandatory and should be in boolean
+      return -> download
+        response should be array, `file`, `fileSize`, `ContentType` and `fileName` keys are mandatory and should be in boolean
+          `file` file stream
 ```
  ### Cors values
 ```
@@ -47,36 +56,7 @@ $app->run();
 ```
 ### File upload
 ```
--
-  uri: /pattern/pattern
-  method: post
-  invoke: [class]->[function]
-
-e.g
--
-  uri: /files
-  method: post
-  invoke: UploadService->upload
-
-  <?php
-    namespace `YourNamespace`;
-
-    use Slim\Http\file;
-
-    Class UploadService {
-      public function upload($data) {
-        $filename = $this->saveFiles('./uploads', $data['files']);
-      }
-
-      public function savefiles($directory, UploadedFile $file) {
-        $extn = pathinfo($file->getClientFilename(), PATHINFO_EXTENSION);
-        $basename = pathinfo($file->getClientFilename(), PATHINFO_FILENAME);
-        $filename = sprintf('%s.%s', $basename, $extension);
-        $file->moveTo($directory . DIRECTORY_SEPARATOR . $filename);
-
-        return $filename;
-      }
-    }
+  in the param, uploaded files are available in the files key.
 ```
 
 ### Here you go
