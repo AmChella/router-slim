@@ -26,15 +26,15 @@ Class ResponseHandler extends Assert {
         $this->inArray('status', $result, 'result.does.not.have.status.key');
         $this->isBool($result['status'], 'result.status.is.not.a.boolean');
 
-        return $this->body->withJson($result $statusCode);
+        return $this->body->withJson($result, $statusCode);
     }
 
     public function downloadResponse($result) {
-        $this->inArray('file', $result, 'file.key.not.found');
-        $this->isEmpty($result['file'], 'file.steam.not.found');
-        $this->inArray('contentType', $result, 'contentType.not.found');
-        $this->inArray('fileName', $result, 'fileName.not.found');
-        $this->inArray('fileSize', $result, 'fileSize.not.found');
+        $this->arrayKeyExists('file', $result, 'file.key.not.found');
+        $this->isEmpty($result['file'], 'file.stream.is.empty.found');
+        $this->arrayKeyExists('contentType', $result, 'contentType.not.found');
+        $this->arrayKeyExists('fileName', $result, 'fileName.not.found');
+        $this->arrayKeyExists('fileSize', $result, 'fileSize.not.found');
 
         $response = $this->body
             ->withHeader('Content-Description', 'File Transfer')

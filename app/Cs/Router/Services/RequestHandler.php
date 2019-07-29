@@ -11,6 +11,7 @@ class RequestHandler extends Assert {
     protected $routes;
     protected $app;
     protected $containers;
+    protected $responseHandler;
 
     /**
      * assignRoutesToService
