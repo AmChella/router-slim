@@ -17,7 +17,6 @@ use \Slim\App as Slim;
  */
 
 Class App extends RequestHandler {
-    private $responseHandler;
 
     public function __construct(
         Slim $slim, Pimple $container, $routes, $cors = []
