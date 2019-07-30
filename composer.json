@@ -2,7 +2,7 @@
     "name": "router/slim",
     "description": "Slim Router",
     "type": "application",
-    "version": "v0.0.3",
+    "version": "v0.0.4",
     "keywords": ["slim", "router", "framework"],
     "homepage": "https://github.com/AmChella/router-slim",
     "license": "MIT",
@@ -14,14 +14,12 @@
         }
     ],
     "require": {
-       "php": ">=7.1",
+       "php": ">=7.2",
         "slim/slim": "^3"
     },
     "autoload": {
-        "psr-0": {
-            "Cs\\Router\\Services": "app/",
-            "Cs\\Router\\Util": "app/",
-            "Cs\\Router\\Exception": "app/"
+        "psr-4": {
+            "Cs\\Router\\": "app/Router"
         }
     },
     "require-dev": {
