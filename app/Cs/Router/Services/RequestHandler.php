@@ -183,7 +183,9 @@ class RequestHandler extends Assert {
     private function getPayloadOfGetMethod(Request $request, $args): Array {
         $data['headers'] = $this->getHeaders($request);
         if (is_array($args) === true && count($args) > 0) {
-            return $data['data'];
+            $data['data'] = $args;
+
+            return $data;
         }
 
         $data['data'] = $request->getQueryParams();
