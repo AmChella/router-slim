@@ -19,7 +19,8 @@ class RequestHandler extends Assert {
      *
      * @return Void
      */
-    public function assignRoutesToService($routes): Void {
+    protected function assignRoutesToService(Array $routes): Void {
+        $map = [];
         foreach ($routes as $route) {
             $this->validateRoute($route);
             $map['url'] = $route['uri'];
@@ -49,22 +50,27 @@ class RequestHandler extends Assert {
         }
 
         list($service, $func) = explode("->", $route['invoke']);
-        $this->validateServiceHasValidCallback($service, $func);
+        $this->validateServiceHasValidCallback(
+            $this->containers, $service, $func
+        );
     }
 
     /**
      * validateServiceHasValidCallback
      *
+     * @param  mixed $container
      * @param  mixed $class
      * @param  mixed $method
      *
-     * @return Void
+     * @return void
      */
-    public function validateServiceHasValidCallback($class, $method): Void {
+    public function validateServiceHasValidCallback(
+        $container, String $class, String $method
+    ): Void {
         $msg = sprintf('func.%s.not.found', $method);
-        $this->hasMethod($this->containers[$class], $method, $msg);
+        $this->hasMethod($container[$class], $method, $msg);
         $msg = sprintf('func.%s.not.callable', $method);
-        $this->isCallable($this->containers[$class], $method, $msg);
+        $this->isCallable($container[$class], $method, $msg);
     }
 
     /**
@@ -101,14 +107,26 @@ class RequestHandler extends Assert {
      *
      * @return Array
      */
-    public function getPostData($req): Array {
+    private function getPostData(Request $req): Array {
         $postData = [];
-        $postData = $req->getParsedBody();
+        $postData['data'] = $req->getParsedBody();
+        $postData['headers'] = $this->getHeaders($req);
         if (count($req->getUploadedFiles()) > 0) {
             $postData['files'] = $this->getFilesUploaded($req);
         }
 
         return $postData;
+    }
+
+    /**
+     * getHeaders
+     *
+     * @param  mixed $req
+     *
+     * @return Array
+     */
+    private function getHeaders(Request $req): Array {
+        return $req->getHeaders();
     }
 
     /**
@@ -118,7 +136,7 @@ class RequestHandler extends Assert {
      *
      * @return Array
      */
-    public function getFilesUploaded(Request $request): Array {
+    private function getFilesUploaded(Request $request): Array {
         $files = [];
         $item = [];
         $uploadedFiles = $request->getUploadedFiles();
@@ -141,31 +159,34 @@ class RequestHandler extends Assert {
      *
      * @return Array
      */
-    public function getPayload($request, $args): Array {
+    private function getPayload(Request $request, $args): Array {
         if ($request->isPost() === true) {
             return $this->getPostData($request);
         }
 
         if ($request->isGet() === true) {
-            return $this->getGetPayload($request, $args);
+            return $this->getPayloadOfGetMethod($request, $args);
         }
 
         throw new InvalidMethodType("invalid.http.method");
     }
 
     /**
-     * getGetPayload
+     * getPayloadOfGetMethod
      *
      * @param  mixed $request
      * @param  mixed $args
      *
      * @return Array
      */
-    public function getGetPayload($request, $args): Array {
+    private function getPayloadOfGetMethod(Request $request, $args): Array {
+        $data['headers'] = $this->getHeaders($request);
         if (is_array($args) === true && count($args) > 0) {
-            return $args;
+            return $data['data'];
         }
 
-        return $request->getQueryParams();
+        $data['data'] = $request->getQueryParams();
+
+        return $data;
     }
 }

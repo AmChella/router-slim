@@ -7,7 +7,18 @@ use Cs\Router\Util\Assert;
 Class ResponseHandler extends Assert {
     private $responseHandler;
 
-    public function setResponse(Response $response, Array $result, $type = 'json') {
+    /**
+     * setResponse
+     *
+     * @param  mixed $response
+     * @param  mixed $result
+     * @param  mixed $type
+     *
+     * @return void
+     */
+    public function setResponse(
+        Response $response, Array $result, $type = 'json'
+    ) {
         $this->body = $response;
         switch(strtolower($type)) {
             case 'json':
@@ -21,7 +32,15 @@ Class ResponseHandler extends Assert {
         }
     }
 
-    public function jsonResponse($result, $statusCode = 200) {
+    /**
+     * jsonResponse
+     *
+     * @param  mixed $result
+     * @param  mixed $statusCode
+     *
+     * @return void
+     */
+    private function jsonResponse($result, $statusCode = 200) {
         $this->arrayNotEmpty($result, 'empty.result.given');
         $this->inArray('status', $result, 'result.does.not.have.status.key');
         $this->isBool($result['status'], 'result.status.is.not.a.boolean');
@@ -29,7 +48,14 @@ Class ResponseHandler extends Assert {
         return $this->body->withJson($result $statusCode);
     }
 
-    public function downloadResponse($result) {
+    /**
+     * downloadResponse
+     *
+     * @param  mixed $result
+     *
+     * @return void
+     */
+    private function downloadResponse($result) {
         $this->inArray('file', $result, 'file.key.not.found');
         $this->isEmpty($result['file'], 'file.steam.not.found');
         $this->inArray('contentType', $result, 'contentType.not.found');
@@ -52,7 +78,14 @@ Class ResponseHandler extends Assert {
         return $response;
     }
 
-    public function rawResponse($result) {
+    /**
+     * rawResponse
+     *
+     * @param  mixed $result
+     *
+     * @return void
+     */
+    private function rawResponse($result) {
         return $this->body->write($result['data']);
     }
 }

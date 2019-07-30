@@ -125,7 +125,7 @@ class AssertTest extends TestCase {
     }
 
     public function testIsJsonWithJson() {
-        Assert::isJson("{'test'}", 'invalid.input');
+        Assert::isJson('{"test":"test"}', 'invalid.input');
         $this->assertTrue(TRUE);
     }
 }
