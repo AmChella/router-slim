@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Cs\\Router\\": "app/Router"
+            "Cs\\Router\\": "app/Cs/Router"
         }
     },
     "require-dev": {
