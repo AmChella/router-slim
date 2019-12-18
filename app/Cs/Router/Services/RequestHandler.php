@@ -69,9 +69,9 @@ class RequestHandler extends Assert {
         $container, String $class, String $method
     ): Void {
         $msg = sprintf('func.%s.not.found', $method);
-        $this->hasMethod($container[$class], $method, $msg);
+        $this->hasMethod($container->get($class), $method, $msg);
         $msg = sprintf('func.%s.not.callable', $method);
-        $this->isCallable($container[$class], $method, $msg);
+        $this->isCallable($container->get($class), $method, $msg);
     }
 
     /**
@@ -88,7 +88,7 @@ class RequestHandler extends Assert {
         ) use ($map, $instance) {
             $args = call_user_func([$instance, 'getPayload'], $request, $args);
             $result = call_user_func(
-                [$instance->containers[$map['service']], $map['func']], $args
+                [$instance->containers->get($map['service']), $map['func']], $args
             );
 
             return call_user_func(
