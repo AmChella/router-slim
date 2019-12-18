@@ -19,7 +19,7 @@ use \Slim\App as Slim;
 Class App extends RequestHandler {
 
     public function __construct(
-        Slim $slim, Pimple $container, $routes, $cors = []
+        Slim $slim, $container, $routes, $cors = []
     ) {
         $this->app = $slim;
         $this->containers = $container;
