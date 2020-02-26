@@ -67,15 +67,9 @@ class RequestHandler extends Assert {
         String $class, String $method
     ): Void {
         $msg = sprintf('func.%s.not.found', $method);
-<<<<<<< HEAD
         $this->hasMethod($this->getClass($class), $method, $msg);
         $msg = sprintf('func.%s.not.callable', $method);
         $this->isCallable($this->getClass($class), $method, $msg);
-=======
-        $this->hasMethod($container->get($class), $method, $msg);
-        $msg = sprintf('func.%s.not.callable', $method);
-        $this->isCallable($container->get($class), $method, $msg);
->>>>>>> 9df7b70349624dfa0b590569055510b96b616633
     }
 
     /**
@@ -92,11 +86,7 @@ class RequestHandler extends Assert {
         ) use ($map, $instance) {
             $args = call_user_func([$instance, 'getPayload'], $request, $args);
             $result = call_user_func(
-<<<<<<< HEAD
-                [$this->getClass($map['service']), $map['func']], $args
-=======
-                [$instance->containers->get($map['service']), $map['func']], $args
->>>>>>> 9df7b70349624dfa0b590569055510b96b616633
+                [$instance->getClass($map['service']), $map['func']], $args
             );
 
             return call_user_func(
@@ -116,7 +106,7 @@ class RequestHandler extends Assert {
      *
      * @return Object
      */
-    private function getClass(Stirng $class): Object {
+    private function getClass(String $class): Object {
         if (\method_exists($this->containers, 'get') === true) {
             return $this->containers->get($class);
         }

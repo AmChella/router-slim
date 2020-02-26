@@ -40,10 +40,14 @@ Class ResponseHandler extends Assert {
      *
      * @return void
      */
-    private function jsonResponse($result, $statusCode = 200) {
+    private function jsonResponse($result) {
         $this->arrayNotEmpty($result, 'empty.result.given');
         $this->inArray('status', $result, 'result.does.not.have.status.key');
         $this->isBool($result['status'], 'result.status.is.not.a.boolean');
+
+        $statusCode = $result['status'] === true ? 200 : isset(
+            $result['statusCode']
+        ) ? $result['statusCode'] : 500;
 
         return $this->body->withJson($result, $statusCode);
     }
@@ -75,6 +79,7 @@ Class ResponseHandler extends Assert {
             ->withHeader('Content-Length', $result['fileSize']);
 
             echo $result['file'];
+
         return $response;
     }
 
