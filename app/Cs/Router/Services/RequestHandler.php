@@ -8,8 +8,8 @@ use Cs\Router\Exception\InvalidMethodType;
 use Cs\Router\Util\Assert;
 
 class RequestHandler extends Assert {
-    protected $routes;
     protected $app;
+    protected $routes;
     protected $containers;
     protected $responseHandler;
 
@@ -46,14 +46,12 @@ class RequestHandler extends Assert {
         $this->isArrayKeyExist('invoke', $route, 'invoke.key.not.found');
         $this->isArrayKeyExist('uri', $route, 'uri.not.found');
         $this->isArrayKeyExist('method', $route, 'method.not.found');
-        if (!preg_match('/[a-zA-Z]{3,15}(->)[a-zA-Z]{5,}/', $route['invoke'])) {
+        if (!preg_match('/[a-zA-Z]{3,}(->)[a-zA-Z]{5,}/', $route['invoke'])) {
             throw new InvalidRoute('route.uri.invalid');
         }
 
         list($service, $func) = explode("->", $route['invoke']);
-        $this->validateServiceHasValidCallback(
-            $this->containers, $service, $func
-        );
+        $this->validateServiceHasValidCallback($service, $func);
     }
 
     /**
@@ -66,12 +64,12 @@ class RequestHandler extends Assert {
      * @return void
      */
     public function validateServiceHasValidCallback(
-        $container, String $class, String $method
+        String $class, String $method
     ): Void {
         $msg = sprintf('func.%s.not.found', $method);
-        $this->hasMethod($container[$class], $method, $msg);
+        $this->hasMethod($this->getClass($class), $method, $msg);
         $msg = sprintf('func.%s.not.callable', $method);
-        $this->isCallable($container[$class], $method, $msg);
+        $this->isCallable($this->getClass($class), $method, $msg);
     }
 
     /**
@@ -88,7 +86,7 @@ class RequestHandler extends Assert {
         ) use ($map, $instance) {
             $args = call_user_func([$instance, 'getPayload'], $request, $args);
             $result = call_user_func(
-                [$instance->containers[$map['service']], $map['func']], $args
+                [$this->getClass($map['service']), $map['func']], $args
             );
 
             return call_user_func(
@@ -99,6 +97,21 @@ class RequestHandler extends Assert {
 
         $pattern = $map['url'];
         $this->app->map([$map['method']], $pattern, $callable);
+    }
+
+    /**
+     * getClass
+     *
+     * @param  mixed $class
+     *
+     * @return Object
+     */
+    private function getClass(Stirng $class): Object {
+        if (\method_exists($this->containers, 'get') === true) {
+            return $this->containers->get($class);
+        }
+
+        return $this->containers[$class];
     }
 
     /**
@@ -117,6 +130,16 @@ class RequestHandler extends Assert {
         }
 
         return $postData;
+    }
+
+    private function getPutData(Request $req, $args): Array {
+        $data = [];
+        $size = $req->getBody->getSize();
+        $data['data'] = $req->getBody()->read($size);
+        $data['headers'] = $this->getHeaders($req);
+        $data['params'] = $this->getPayloadOfGetMethod($req, $args);
+
+        return $data;
     }
 
     /**
@@ -162,11 +185,19 @@ class RequestHandler extends Assert {
      */
     private function getPayload(Request $request, $args): Array {
         if ($request->isPost() === true) {
-            return $this->getPostData($request);
+            $data = $this->getPostData($request);
+            $paramValues = $this->getPayloadOfGetMethod($request, $args);
+            $data['params'] = $paramValues['params'] ?? "";
+
+            return $data;
         }
 
         if ($request->isGet() === true) {
             return $this->getPayloadOfGetMethod($request, $args);
+        }
+
+        if ($request->isPut() === true) {
+            return $this->getPutData($request, $args);
         }
 
         throw new InvalidMethodType("invalid.http.method");
@@ -183,12 +214,12 @@ class RequestHandler extends Assert {
     private function getPayloadOfGetMethod(Request $request, $args): Array {
         $data['headers'] = $this->getHeaders($request);
         if (is_array($args) === true && count($args) > 0) {
-            $data['data'] = $args;
+            $data['params'] = $args;
 
             return $data;
         }
 
-        $data['data'] = $request->getQueryParams();
+        $data['params'] = $request->getQueryParams();
 
         return $data;
     }

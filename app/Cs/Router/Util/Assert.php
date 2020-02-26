@@ -98,7 +98,7 @@ Abstract Class Assert {
     }
 
     public static function inArray($value, $array, $message): Void {
-        if (in_array($value, $array) === false) {
+        if (array_key_exists($value, $array) === false) {
             throw new Exception($message);
         }
     }
