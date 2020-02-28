@@ -45,9 +45,17 @@ Class ResponseHandler extends Assert {
         $this->inArray('status', $result, 'result.does.not.have.status.key');
         $this->isBool($result['status'], 'result.status.is.not.a.boolean');
 
-        $statusCode = $result['status'] === true ? 200 : isset(
-            $result['statusCode']
-        ) ? $result['statusCode'] : 500;
+        $statusCode = 200;
+        if (array_key_exists('statusCode', $result) === true) {
+            $this->isNumber(
+                $result['statusCode'], 'status.code.should.be.a.number'
+            );
+            $statusCode = $result['statusCode'];
+        }
+
+        if ($result['status'] === false) {
+            $statusCode = 500;
+        }
 
         return $this->body->withJson($result, $statusCode);
     }
