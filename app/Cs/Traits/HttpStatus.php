@@ -1,5 +1,5 @@
 <?php
-namespace Cs\Router\Util;
+namespace Cs\Router\Traits;
 
 use \Exception;
 
