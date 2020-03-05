@@ -2,11 +2,10 @@
 namespace Cs\Router\Util;
 
 use \Exception;
-use Pimple\Container as Pimple;
 use Cs\Router\Services\Cors;
 use Cs\Router\Services\RequestHandler;
 use Cs\Router\Services\ResponseHandler;
-use \Slim\App as Slim;
+use Slim\Factory\AppFactory;
 
 /**
  * @category Router_Package_For_Slim_3
@@ -19,16 +18,21 @@ use \Slim\App as Slim;
 Class App extends RequestHandler {
 
     public function __construct(
-        Slim $slim, $container, $routes, $cors = []
+        $slim, $container, $routes, $cors = [], $settings = []
     ) {
-        $this->app = $slim;
+        $this->initApp($slim, $settings);
         $this->containers = $container;
         $this->arrayNotEmpty($routes, 'routes.should.be.an.array');
         $this->routes = $routes;
         if (count($cors) > 0) {
             $this->setCors($cors);
         }
+
         $this->responseHandler = new ResponseHandler();
+    }
+
+    private function initApp($slim, Array $settings): Void {
+        $this->app = AppFactory::create();
     }
 
     private function setCors($cors): Void {
@@ -36,7 +40,7 @@ Class App extends RequestHandler {
     }
 
     public function run(): Void {
-        $this->assignRoutesToService($this->routes);
+        $this->routeToService($this->routes);
         $this->app->run();
     }
 }

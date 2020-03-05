@@ -3,10 +3,10 @@ namespace Cs\Router\Services;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Cs\Router\Util\Assert;
+use Cs\Router\Traits\HttpStatus;
 
 Class ResponseHandler extends Assert {
-    private $responseHandler;
-
+    use HttpStatus;
     /**
      * setResponse
      *
@@ -20,15 +20,16 @@ Class ResponseHandler extends Assert {
         Response $response, Array $result, $type = 'json'
     ) {
         $this->body = $response;
+        $code = $this->getStatusCode($result);
         switch(strtolower($type)) {
             case 'json':
-                return $this->jsonResponse($result);
+                return $this->getJsonResponse($result, $code);
             case 'raw':
-                return $this->rawResponse($result);
+                return $this->getRawResponse($result, $code);
             case 'download':
-                return $this->downloadResponse($result);
+                return $this->getDownloadResponse($result, $code);
             default:
-                return $this->jsonResponse($result);
+                return $this->getRawResponse($result, $code);
         }
     }
 
@@ -40,22 +41,10 @@ Class ResponseHandler extends Assert {
      *
      * @return void
      */
-    private function jsonResponse($result) {
+    private function getJsonResponse($result, $statusCode = 200) {
         $this->arrayNotEmpty($result, 'empty.result.given');
         $this->inArray('status', $result, 'result.does.not.have.status.key');
         $this->isBool($result['status'], 'result.status.is.not.a.boolean');
-
-        $statusCode = 200;
-        if (array_key_exists('statusCode', $result) === true) {
-            $this->isNumber(
-                $result['statusCode'], 'status.code.should.be.a.number'
-            );
-            $statusCode = $result['statusCode'];
-        }
-
-        if ($result['status'] === false) {
-            $statusCode = 500;
-        }
 
         return $this->body->withJson($result, $statusCode);
     }
@@ -67,7 +56,7 @@ Class ResponseHandler extends Assert {
      *
      * @return void
      */
-    public function downloadResponse($result) {
+    public function getDownloadResponse($result) {
         $this->arrayKeyExists('file', $result, 'file.key.not.found');
         $this->isEmpty($result['file'], 'file.stream.is.empty.found');
         $this->arrayKeyExists('contentType', $result, 'contentType.not.found');
@@ -98,7 +87,7 @@ Class ResponseHandler extends Assert {
      *
      * @return void
      */
-    private function rawResponse($result) {
-        return $this->body->write($result['data']);
+    private function getRawResponse($result, $statusCode = 200) {
+        return $this->body->write($result['data'])->withStatus($statusCode);
     }
 }

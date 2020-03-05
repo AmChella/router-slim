@@ -115,7 +115,7 @@ Abstract Class Assert {
         }
     }
 
-    public function isCallable($class, $method, $message): Void {
+    public function isMethodCallable($class, $method, $message): Void {
         if (is_callable([$class, $method]) === false) {
             throw new Exception($message);
         }

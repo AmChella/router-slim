@@ -6,8 +6,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Cs\Router\Exception\InvalidRoute;
 use Cs\Router\Exception\InvalidMethodType;
 use Cs\Router\Util\Assert;
+use Cs\Router\Traits\HttpPayload;
 
-class RequestHandler extends Assert {
+Class RequestHandler extends Assert {
+    use HttpPayload;
     protected $app;
     protected $routes;
     protected $containers;
@@ -20,17 +22,17 @@ class RequestHandler extends Assert {
      *
      * @return Void
      */
-    protected function assignRoutesToService(Array $routes): Void {
-        $map = [];
+    protected function routeToService(Array $routes): Void {
+        $mapping = [];
         foreach ($routes as $route) {
             $this->validateRoute($route);
-            $map['url'] = $route['uri'];
+            $mapping['url'] = $route['uri'];
             list($service, $func) = explode("->", $route['invoke']);
-            $map['method'] = $route['method'];
-            $map['service'] = $service;
-            $map['func'] = $func;
-            $map['return'] = $route['return'] ?? 'json';
-            $this->assignCallback($map);
+            $mapping['method'] = $route['method'];
+            $mapping['service'] = $service;
+            $mapping['func'] = $func;
+            $mapping['return'] = $route['return'] ?? 'json';
+            $this->mapCallback($mapping);
         }
     }
 
@@ -42,16 +44,16 @@ class RequestHandler extends Assert {
      * @return Void
      */
     public function validateRoute(Array $route): Void {
-        $this->isHashArray($route, 'routes.not.an.array');
+        $this->isHashArray($route, 'route.is.not.an.array');
         $this->isArrayKeyExist('invoke', $route, 'invoke.key.not.found');
         $this->isArrayKeyExist('uri', $route, 'uri.not.found');
         $this->isArrayKeyExist('method', $route, 'method.not.found');
         if (!preg_match('/[a-zA-Z]{3,}(->)[a-zA-Z]{5,}/', $route['invoke'])) {
-            throw new InvalidRoute('route.uri.invalid');
+            throw new InvalidRoute('invoke.pattern.is.invalid');
         }
 
         list($service, $func) = explode("->", $route['invoke']);
-        $this->validateServiceHasValidCallback($service, $func);
+        $this->checkRouteHasValidCallback($service, $func);
     }
 
     /**
@@ -63,13 +65,13 @@ class RequestHandler extends Assert {
      *
      * @return void
      */
-    public function validateServiceHasValidCallback(
+    public function checkRouteHasValidCallback(
         String $class, String $method
     ): Void {
         $msg = sprintf('func.%s.not.found', $method);
         $this->hasMethod($this->getClass($class), $method, $msg);
         $msg = sprintf('func.%s.not.callable', $method);
-        $this->isCallable($this->getClass($class), $method, $msg);
+        $this->isMethodCallable($this->getClass($class), $method, $msg);
     }
 
     /**
@@ -79,17 +81,17 @@ class RequestHandler extends Assert {
      *
      * @return Void
      */
-    private function assignCallback(Array $map): Void {
+    private function mapCallback(Array $map): Void {
         $instance = $this;
         $callable = function (
             Request $request, Response $response, $args
         ) use ($map, $instance) {
-            $args = call_user_func([$instance, 'getPayload'], $request, $args);
-            $result = call_user_func(
+            $args = \call_user_func([$instance, 'getPayload'], $request, $args);
+            $result = \call_user_func(
                 [$instance->getClass($map['service']), $map['func']], $args
             );
 
-            return call_user_func(
+            return \call_user_func(
                 [$instance->responseHandler, 'setResponse'],
                 $response, $result, $map['return'] ?? 'json'
             );
@@ -112,115 +114,5 @@ class RequestHandler extends Assert {
         }
 
         return $this->containers[$class];
-    }
-
-    /**
-     * getPostData
-     *
-     * @param  mixed $req
-     *
-     * @return Array
-     */
-    private function getPostData(Request $req): Array {
-        $postData = [];
-        $postData['data'] = $req->getParsedBody();
-        $postData['headers'] = $this->getHeaders($req);
-        if (count($req->getUploadedFiles()) > 0) {
-            $postData['files'] = $this->getFilesUploaded($req);
-        }
-
-        return $postData;
-    }
-
-    private function getPutData(Request $req, $args): Array {
-        $data = [];
-        $size = $req->getBody->getSize();
-        $data['data'] = $req->getBody()->read($size);
-        $data['headers'] = $this->getHeaders($req);
-        $data['params'] = $this->getPayloadOfGetMethod($req, $args);
-
-        return $data;
-    }
-
-    /**
-     * getHeaders
-     *
-     * @param  mixed $req
-     *
-     * @return Array
-     */
-    private function getHeaders(Request $req): Array {
-        return $req->getHeaders();
-    }
-
-    /**
-     * getFilesUploaded
-     *
-     * @param  mixed $request
-     *
-     * @return Array
-     */
-    private function getFilesUploaded(Request $request): Array {
-        $files = [];
-        $item = [];
-        $uploadedFiles = $request->getUploadedFiles();
-        foreach($uploadedFiles as $file) {
-            $item['file'] = $file->getStream();
-            $item['name'] = $file->getClientFilename();
-            $item['mime'] = $file->getClientMediaType();
-            $item['size'] = $file->getSize();
-            $files[] = $item;
-        }
-
-        return $files;
-    }
-
-    /**
-     * getPayload
-     *
-     * @param  mixed $request
-     * @param  mixed $args
-     *
-     * @return Array
-     */
-    private function getPayload(Request $request, $args): Array {
-        if ($request->isPost() === true) {
-            $data = $this->getPostData($request);
-            $paramValues = $this->getPayloadOfGetMethod($request, $args);
-            $data['params'] = $paramValues['params'] ?? "";
-
-            return $data;
-        }
-
-        if ($request->isGet() === true) {
-            return $this->getPayloadOfGetMethod($request, $args);
-        }
-
-        if ($request->isPut() === true) {
-            return $this->getPutData($request, $args);
-        }
-
-        throw new InvalidMethodType("invalid.http.method");
-    }
-
-    /**
-     * getPayloadOfGetMethod
-     *
-     * @param  mixed $request
-     * @param  mixed $args
-     *
-     * @return Array
-     */
-    private function getPayloadOfGetMethod(Request $request, $args): Array {
-        $data['headers'] = $this->getHeaders($request);
-        if (is_array($args) === true && count($args) > 0) {
-            $data['params'] = $args;
-
-            return $data;
-        }
-
-        $data['params'] = $request->getQueryParams();
-
-        return $data;
     }
 }
