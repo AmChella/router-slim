@@ -1,16 +1,22 @@
 <?php
 namespace Cs\Router\Services;
 
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 class Cors {
     protected $settings;
 
-    public function __construct($settings = []) {
+    public function __construct($settings = [], $app) {
+        $this->app = $app;
         $this->settings = array_merge([
                 'origin' => '*',    // Wide Open!
                 'allowMethods' => 'GET, HEAD, PUT, POST'
             ], $settings
         );
+
     }
 
     protected function setOrigin($req, $rsp): Object {
@@ -45,7 +51,6 @@ class Cors {
                 $origin = reset($allowedOrigins);
             }
         }
-
         return $rsp->withHeader('Access-Control-Allow-Origin', $origin);
     }
 
@@ -108,6 +113,7 @@ class Cors {
             $rsp = $this->setAllowCredentials($req, $rsp);
             $rsp = $this->setAllowMethods($req, $rsp);
             $rsp = $this->setAllowHeaders($req, $rsp);
+
             return $rsp;
         }
 
@@ -118,17 +124,22 @@ class Cors {
         return $rsp;
     }
 
-    public function __invoke($request, $response, $next) {
+    public function __invoke(Request $request, RequestHandler $handler) {
+        $this->app->map(
+            ['OPTIONS'], '/{routes:.+}',
+            function(Request $request, Response $response) {
+                return $response;
+            }
+        );
+
+        $response = $handler->handle($request);
         $response = $this->setCorsHeaders($request, $response);
-        if ($request->isOptions() === false) {
-            $response = $next($request, $response);
-        }
 
         return $response;
     }
 
-    public static function routeMiddleware($settings = []): Object {
-        $cors = new Cors($settings);
+    public static function routeMiddleware($settings = [], $app): Object {
+        $cors = new Cors($settings, $app);
 
         return $cors;
     }

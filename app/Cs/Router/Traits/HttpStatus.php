@@ -4,7 +4,7 @@ namespace Cs\Router\Traits;
 use \Exception;
 
 Trait HttpStatus {
-    private function getStatusCode(Array $result): Integer {
+    private function getStatusCode(Array $result): Int {
         $code = 200;
         if (\array_key_exists('statusCode', $result) === true) {
             $this->isNumber(

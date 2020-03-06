@@ -33,10 +33,11 @@ Class App extends RequestHandler {
 
     private function initApp($slim, Array $settings): Void {
         $this->app = AppFactory::create();
+        $this->app->setBasePath('/index.php');
     }
 
     private function setCors($cors): Void {
-        $this->app->add(Cors::routeMiddleware($cors));
+        $this->app->add(Cors::routeMiddleware($cors, $this->app));
     }
 
     public function run(): Void {

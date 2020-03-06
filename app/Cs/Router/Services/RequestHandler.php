@@ -28,10 +28,10 @@ Class RequestHandler extends Assert {
             $this->validateRoute($route);
             $mapping['url'] = $route['uri'];
             list($service, $func) = explode("->", $route['invoke']);
-            $mapping['method'] = $route['method'];
+            $mapping['method'] = \strtoupper($route['method']);
             $mapping['service'] = $service;
             $mapping['func'] = $func;
-            $mapping['return'] = $route['return'] ?? 'json';
+            $mapping['return'] = $route['return'] ?? 'raw';
             $this->mapCallback($mapping);
         }
     }
@@ -93,12 +93,12 @@ Class RequestHandler extends Assert {
 
             return \call_user_func(
                 [$instance->responseHandler, 'setResponse'],
-                $response, $result, $map['return'] ?? 'json'
+                $response, $result, $map['return']
             );
         };
 
-        $pattern = $map['url'];
-        $this->app->map([$map['method']], $pattern, $callable);
+        $path = $map['url'];
+        $this->app->map([$map['method']], $path, $callable);
     }
 
     /**

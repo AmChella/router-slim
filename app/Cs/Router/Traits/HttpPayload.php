@@ -108,8 +108,7 @@ Trait HttpPayload {
         $data['headers'] = $this->getHeaders($request);
         $data['params'] = $request->getQueryParams();
         if (is_array($args) === true && count($args) > 0) {
-            array_merge_recursive($data['params'], $args);
-
+            $data['params'] = array_merge_recursive($data['params'], $args);
         }
 
         return $data;

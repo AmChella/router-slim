@@ -17,7 +17,7 @@ Class ResponseHandler extends Assert {
      * @return void
      */
     public function setResponse(
-        Response $response, Array $result, $type = 'json'
+        Response $response, Array $result, $type = 'raw'
     ) {
         $this->body = $response;
         $code = $this->getStatusCode($result);
@@ -46,7 +46,7 @@ Class ResponseHandler extends Assert {
         $this->inArray('status', $result, 'result.does.not.have.status.key');
         $this->isBool($result['status'], 'result.status.is.not.a.boolean');
 
-        return $this->body->withJson($result, $statusCode);
+        return $this->body->withJson($result)->withStatus($statusCode);
     }
 
     /**
