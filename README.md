@@ -33,7 +33,7 @@ $app->run();
 ### Create a routes as below and send the routes as array.
 ```
 -
-  uri: /test[/{return}] json|raw|download (optional. Default is raw)
+  url: /test[/{return}] json|raw|download (optional. Default is raw)
   method: get|post|put|head|delete
   invoke: [class]->[function]
 ```
