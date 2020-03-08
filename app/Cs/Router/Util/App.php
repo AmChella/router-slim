@@ -33,7 +33,6 @@ Class App extends RequestHandler {
 
     private function initApp($slim, Array $settings): Void {
         $this->app = AppFactory::create();
-        $this->app->setBasePath('/index.php');
     }
 
     private function setCors($cors): Void {
@@ -41,7 +40,14 @@ Class App extends RequestHandler {
     }
 
     public function run(): Void {
-        $this->routeToService($this->routes);
-        $this->app->run();
+        try {
+            $this->routeToService($this->routes);
+            $this->app->run();
+        } catch (\Exception $e) {
+            $statusCode = $e->getCode();
+            $traceMessage = $e->getTraceAsString();
+            $message = $e->getMessage();
+            throw new Exception($message, $statusCode);
+        }
     }
 }

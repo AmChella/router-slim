@@ -17,7 +17,7 @@ Class ResponseHandler extends Assert {
      * @return void
      */
     public function setResponse(
-        Response $response, Array $result, $type = 'raw'
+        Response $response, $result, $type
     ) {
         $this->body = $response;
         $code = $this->getStatusCode($result);
@@ -42,11 +42,11 @@ Class ResponseHandler extends Assert {
      * @return void
      */
     private function getJsonResponse($result, $statusCode = 200) {
-        $this->arrayNotEmpty($result, 'empty.result.given');
-        $this->inArray('status', $result, 'result.does.not.have.status.key');
-        $this->isBool($result['status'], 'result.status.is.not.a.boolean');
+        $this->isEmpty($result, 'empty.result.given');
+        $data = ['status' => $this->getStatus($statusCode)];
+        $data['body'] = $result;
 
-        return $this->body->withJson($result)->withStatus($statusCode);
+        return $this->body->withJson($data)->withStatus($statusCode);
     }
 
     /**
@@ -56,7 +56,7 @@ Class ResponseHandler extends Assert {
      *
      * @return void
      */
-    public function getDownloadResponse($result) {
+    public function getDownloadResponse(Array $result) {
         $this->arrayKeyExists('file', $result, 'file.key.not.found');
         $this->isEmpty($result['file'], 'file.stream.is.empty.found');
         $this->arrayKeyExists('contentType', $result, 'contentType.not.found');
@@ -64,7 +64,7 @@ Class ResponseHandler extends Assert {
         $this->arrayKeyExists('fileSize', $result, 'fileSize.not.found');
 
         $response = $this->body
-            ->withHeader('Content-Description', 'File Transfer')
+            ->withHeader('Content-Description', 'File Download')
             ->withHeader('Content-Type', $result['contentType'])
             ->withHeader(
                 'Content-Disposition',
@@ -88,6 +88,12 @@ Class ResponseHandler extends Assert {
      * @return void
      */
     private function getRawResponse($result, $statusCode = 200) {
-        return $this->body->write($result['data'])->withStatus($statusCode);
+        $this->isEmpty($result, 'empty.result.given');
+        $body = $result;
+        if (\is_array($result) === true) {
+            $body = \json_encode($result);
+        }
+
+        return $this->body->write($body)->withStatus($statusCode);
     }
 }

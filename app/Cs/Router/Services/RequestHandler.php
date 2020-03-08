@@ -7,6 +7,7 @@ use Cs\Router\Exception\InvalidRoute;
 use Cs\Router\Exception\InvalidMethodType;
 use Cs\Router\Util\Assert;
 use Cs\Router\Traits\HttpPayload;
+use \Exception;
 
 Class RequestHandler extends Assert {
     use HttpPayload;
@@ -26,12 +27,11 @@ Class RequestHandler extends Assert {
         $mapping = [];
         foreach ($routes as $route) {
             $this->validateRoute($route);
-            $mapping['url'] = $route['uri'];
+            $mapping['url'] = $route['url'];
             list($service, $func) = explode("->", $route['invoke']);
             $mapping['method'] = \strtoupper($route['method']);
             $mapping['service'] = $service;
             $mapping['func'] = $func;
-            $mapping['return'] = $route['return'] ?? 'raw';
             $this->mapCallback($mapping);
         }
     }
@@ -46,7 +46,7 @@ Class RequestHandler extends Assert {
     public function validateRoute(Array $route): Void {
         $this->isHashArray($route, 'route.is.not.an.array');
         $this->isArrayKeyExist('invoke', $route, 'invoke.key.not.found');
-        $this->isArrayKeyExist('uri', $route, 'uri.not.found');
+        $this->isArrayKeyExist('url', $route, 'uri.not.found');
         $this->isArrayKeyExist('method', $route, 'method.not.found');
         if (!preg_match('/[a-zA-Z]{3,}(->)[a-zA-Z]{5,}/', $route['invoke'])) {
             throw new InvalidRoute('invoke.pattern.is.invalid');
@@ -86,15 +86,26 @@ Class RequestHandler extends Assert {
         $callable = function (
             Request $request, Response $response, $args
         ) use ($map, $instance) {
-            $args = \call_user_func([$instance, 'getPayload'], $request, $args);
-            $result = \call_user_func(
-                [$instance->getClass($map['service']), $map['func']], $args
-            );
-
-            return \call_user_func(
-                [$instance->responseHandler, 'setResponse'],
-                $response, $result, $map['return']
-            );
+            try {
+                $args = \call_user_func([$instance, 'getPayload'], $request, $args);
+                $returnMode = $this->getReturnMode($args['params']);
+                $result = \call_user_func(
+                    [$instance->getClass($map['service']), $map['func']], $args
+                );
+            }
+            catch(Exception $e) {
+                $result['statusCode'] = 500;
+                if ($e->getCode()) {
+                    $result = $e->getCode();
+                }
+                
+                $result['data'] = $e->getMessage();
+            } finally {
+                return \call_user_func(
+                    [$instance->responseHandler, 'setResponse'],
+                    $response, $result, $returnMode
+                );
+            }
         };
 
         $path = $map['url'];

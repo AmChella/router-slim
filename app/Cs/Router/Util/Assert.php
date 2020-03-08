@@ -61,6 +61,10 @@ Abstract Class Assert {
 
     public static function isEmpty($data, $message): Void {
         self::notNull($data, $message);
+        if (\is_array($data) === true && count($data) > 0) {
+            return;
+        }
+
         if (strlen($data) === 0) {
             throw new Exception($message);
         }
