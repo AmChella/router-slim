@@ -33,15 +33,14 @@ $app->run();
 ### Create a routes as below and send the routes as array.
 ```
 -
-  uri: /
+  uri: /test[/{return}] json|raw|download (optional. Default is raw)
   method: get|post|put|head|delete
   invoke: [class]->[function]
-  return: json|raw|download (optional. Default is raw)
 ```
-* **`uri`** is the path of route
+* **`url`** is the path of route
 * **`method`** is http method like get|post. you can specify it either small or caps
 * **`invoke`** is callback placeholder. *`class`* is a service name and *`function`* is callback method. If you were using DI container then provide full path of the service name.
-* **`return`** is response body, how you want the api response body. *`json`* will return response as *`json`*, *`raw`* will return the text body, *`download`* will force the response as downloadable stream.
+* **`[/{return}]`** is how response body would be. *`json`* will return response as *`json`*, *`raw`* will return the text body, *`download`* will force the response as downloadable stream.
 * if you specified return is *`download`* and your response body should be like blow
 
 ***
@@ -81,20 +80,17 @@ $app->run();
 #### Example
 ```
 -
-  uri: /test
+  url: /test[/{return}]
   method: post
   invoke: test->welcome
-  return: raw
 -
-  uri: /test/{token}
+  url: /test/{token}[/{return}]
   method: get
   invoke: test->getData
-  return: json
 -
-  uri: /test/download
+  url: /test/download[/{download}]
   method: get
   invoke: test->getFile
-  return: json
 ```
  ### Cors values
 ```
