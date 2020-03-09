@@ -47,10 +47,10 @@ $app->run();
 ### Your service Response should like below
 ***
 
-##### Response body -> `Download`
+##### Response body -> `Download` 
+**Note**: Response should be in a array.
 ```
 [
-  'status' => true|false (boolean),
   'file' => filestream,
   'fileSize' => sizeoffile,
   'ContentType' => mime,
@@ -62,7 +62,6 @@ $app->run();
 ##### Response body -> `json`
 ```
 [
-  'status' => true|false (boolean),
   'statusCode' => integer (optional),
   'data' => data [array|string]
 ]
@@ -70,11 +69,7 @@ $app->run();
 
 ##### Response body -> `raw`
 ```
-[
-  'status' => true|false (boolean),
-  'statusCode' => integer (optional),
-  'data' => data [string]
-]
+  'statusCode' -> (string)
 ```
 
 #### Example
@@ -88,7 +83,7 @@ $app->run();
   method: get
   invoke: test->getData
 -
-  url: /test/download[/{download}]
+  url: /test/download[/{return}] (You should specify return is download)
   method: get
   invoke: test->getFile
 ```
