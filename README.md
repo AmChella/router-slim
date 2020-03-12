@@ -42,7 +42,7 @@ $app->run();
 ```
 * **`url`** is the path of route
 * **`method`** is http method like get|post. you can specify it either small or caps
-* **`routeBeforeInvoke`** is special routing like middleware(optional). this is will invoked before actual method and that response will to forwared with method|function name as **`array`**.
+* **`routeBeforeInvoke`** is a special routing like middleware(optional). this is will be invoked before actual method call and the response will to forwared with method|function name as **`array`**.
 * **`invoke`** is callback placeholder. *`class`* is a service name and *`function`* is callback method. If you were using DI container then provide full path of the service name.
 * **`[/{return}]`** is how response body would be. *`json`* will return response as *`json`*, *`raw`* will return the text body, *`download`* will force the response as downloadable stream.
 * if you specified return is *`download`* and your response body should be like blow
