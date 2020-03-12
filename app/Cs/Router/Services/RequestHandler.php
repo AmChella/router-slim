@@ -7,6 +7,7 @@ use Cs\Router\Exception\InvalidRoute;
 use Cs\Router\Exception\InvalidMethodType;
 use Cs\Router\Util\Assert;
 use Cs\Router\Traits\HttpPayload;
+use Psr\Http\Server\RequestHandlerInterface as RHandler;
 use \Exception;
 
 Class RequestHandler extends Assert {
@@ -32,6 +33,7 @@ Class RequestHandler extends Assert {
             $mapping['method'] = \strtoupper($route['method']);
             $mapping['service'] = $service;
             $mapping['func'] = $func;
+            $mapping['middlewares'] = $route['routeBeforeInvoke'] ?? [];
             $this->mapCallback($mapping);
         }
     }
@@ -88,9 +90,10 @@ Class RequestHandler extends Assert {
         ) use ($map, $instance) {
             try {
                 $args = \call_user_func([$instance, 'getPayload'], $request, $args);
-                $returnMode = $this->getReturnMode($args['params']);
+                $returnMode = $instance->getReturnMode($args['params']);
+                $rbiResult = $instance->routeBeforeInvoker($map['middlewares'], $args);
                 $result = \call_user_func(
-                    [$instance->getClass($map['service']), $map['func']], $args
+                    [$instance->getClass($map['service']), $map['func']], $rbiResult
                 );
             }
             catch(Exception $e) {
@@ -98,7 +101,7 @@ Class RequestHandler extends Assert {
                 if ($e->getCode()) {
                     $result = $e->getCode();
                 }
-                
+
                 $result['data'] = $e->getMessage();
             } finally {
                 return \call_user_func(
@@ -108,8 +111,32 @@ Class RequestHandler extends Assert {
             }
         };
 
+
         $path = $map['url'];
         $this->app->map([$map['method']], $path, $callable);
+    }
+
+    /**
+     * routeBeforeInvoker
+     *
+     * @param  mixed $middleWares
+     * @param  mixed $args
+     * @return Array
+     */
+    private function routeBeforeInvoker(
+        Array $middleWares, Array $args
+    ): Array {
+        $payload = $args;
+        $result = [];
+        foreach($middleWares as $middleware) {
+            list($service, $func) = explode("->", $middleware);
+            $this->checkRouteHasValidCallback($service, $func);
+            $result[$func] = call_user_func_array(
+                [$this->getClass($service), $func], [$args]
+            );
+        }
+
+        return array_merge($payload, $result);
     }
 
     /**

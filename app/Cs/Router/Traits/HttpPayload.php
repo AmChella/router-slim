@@ -2,6 +2,7 @@
 namespace Cs\Router\Traits;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Cs\Router\Exception\InvalidMethodType;
 
 Trait HttpPayload {
     /**
@@ -71,8 +72,7 @@ Trait HttpPayload {
      */
     private function getPutData(Request $req, $args): Array {
         $data = [];
-        $size = $req->getBody->getSize();
-        $data['data'] = $req->getBody()->read($size);
+        $data['data'] = $req->getParsedBody();
         $data['headers'] = $this->getHeaders($req);
         $queryData = $this->getGetData($req, $args);
         $data['params'] = $queryData['params'] ?? "";
