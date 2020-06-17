@@ -33,6 +33,8 @@ Class App extends RequestHandler {
 
     private function initApp($slim, Array $settings): Void {
         $this->app = AppFactory::create();
+        $this->debug = array_key_exists('debug', $settings) === true ? 
+        $settings['debug']: false;
     }
 
     private function setCors($cors): Void {
@@ -46,8 +48,7 @@ Class App extends RequestHandler {
         } catch (\Exception $e) {
             $statusCode = $e->getCode();
             $traceMessage = $e->getTraceAsString();
-            $message = $e->getMessage();
-            throw new Exception($message, $statusCode);
+            throw new Exception($traceMessage, $statusCode);
         }
     }
 }

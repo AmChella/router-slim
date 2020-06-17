@@ -43,11 +43,18 @@ Trait HttpPayload {
      *
      * @return String
      */
-    private function getReturnMode(Array $params): String {
+    private function getReturnMode(Array $params, $returnMode): String {
         $mode = 'raw';
         $allowed = ["raw", "json", "download"];
-        if (count($params) === 0) {
+        if (count($params) === 0 && is_null($returnMode) === true) {
             return $mode;
+        }
+
+        if (
+            count($params) === 0 && is_null($returnMode) === false && 
+            in_array($returnMode, $allowed) === true
+        ) {
+            return $returnMode;
         }
 
         foreach($params as $key => $value) {

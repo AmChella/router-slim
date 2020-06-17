@@ -34,6 +34,7 @@ Class RequestHandler extends Assert {
             $mapping['service'] = $service;
             $mapping['func'] = $func;
             $mapping['middlewares'] = $route['routeBeforeInvoke'] ?? [];
+            $mapping['returnMode'] = $route['return'] ?? null;
             $this->mapCallback($mapping);
         }
     }
@@ -90,20 +91,26 @@ Class RequestHandler extends Assert {
         ) use ($map, $instance) {
             try {
                 $args = \call_user_func([$instance, 'getPayload'], $request, $args);
-                $returnMode = $instance->getReturnMode($args['params']);
+                $returnMode = $instance->getReturnMode($args['params'], $map['returnMode']);
                 $rbiResult = $instance->routeBeforeInvoker($map['middlewares'], $args);
                 $result = \call_user_func(
                     [$instance->getClass($map['service']), $map['func']], $rbiResult
+                );
+                return \call_user_func(
+                    [$instance->responseHandler, 'setResponse'],
+                    $response, $result, $returnMode
                 );
             }
             catch(Exception $e) {
                 $result['statusCode'] = 500;
                 if ($e->getCode()) {
-                    $result = $e->getCode();
+                    $result['statusCode'] = $e->getCode();
+                }
+                $result['message'] = 'something.went.wrong';
+                if ($instance->debug === true) {
+                    $result['message'] = $e->getTraceAsString();
                 }
 
-                $result['data'] = $e->getMessage();
-            } finally {
                 return \call_user_func(
                     [$instance->responseHandler, 'setResponse'],
                     $response, $result, $returnMode
