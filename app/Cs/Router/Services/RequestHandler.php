@@ -108,7 +108,8 @@ Class RequestHandler extends Assert {
                 }
                 $result['message'] = 'something.went.wrong';
                 if ($instance->debug === true) {
-                    $result['message'] = $e->getTraceAsString();
+                    $result['trace'] = $e->getTraceAsString();
+                    $result['message'] = $e->getMessage();
                 }
 
                 return \call_user_func(

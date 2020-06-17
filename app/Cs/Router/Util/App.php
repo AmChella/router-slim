@@ -34,7 +34,7 @@ Class App extends RequestHandler {
     private function initApp($slim, Array $settings): Void {
         $this->app = AppFactory::create();
         $this->debug = array_key_exists('debug', $settings) === true ? 
-        $settings['debug']: false;
+        $settings['debug'] === 1 ? true : false : false;
     }
 
     private function setCors($cors): Void {
