@@ -44,7 +44,7 @@ Class ResponseHandler extends Assert {
     private function getJsonResponse(Array $result, $statusCode = 200) {
         $this->isEmpty($result, 'empty.result.given');
         $data = $result;
-        $data = ['status' => $this->getStatus($statusCode)];
+        $data['status'] = $this->getStatus($statusCode);
 
         return $this->body->withJson($data)->withStatus($statusCode);
     }
