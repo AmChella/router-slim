@@ -49,11 +49,11 @@ Trait HttpPayload {
         if (count($params) === 0 && is_null($returnMode) === true) {
             return $mode;
         }
-
+        
         if (
-            count($params) === 0 && is_null($returnMode) === false && 
-            in_array($returnMode, $allowed) === true
-        ) {
+            count($params) > 0  && array_key_exists('return', $params) === false && 
+            is_null($returnMode) === false && in_array($returnMode, $allowed) === true
+            ) {
             return $returnMode;
         }
 
