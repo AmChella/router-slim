@@ -114,7 +114,7 @@ Class RequestHandler extends Assert {
 
                 return \call_user_func(
                     [$instance->responseHandler, 'setResponse'],
-                    $response, $result, $returnMode
+                    $response, $result, 'json'
                 );
             }
         };
