@@ -45,6 +45,10 @@ Class ResponseHandler extends Assert {
         $this->isEmpty($result, 'empty.result.given');
         $data = $result;
         $data['status'] = $this->getStatus($statusCode);
+        //overriding status if status key found in result. 
+        if (\array_key_exists('status', $result) === true) {
+            $data['status'] = $result['status'];
+        }
 
         return $this->body->withJson($data)->withStatus($statusCode);
     }
