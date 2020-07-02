@@ -13,7 +13,7 @@ Use [Composer](https://getcomposer.org/)
 
 ### Do Composer Require as below
 ```
-composer require router/slim
+composer require router/slim {version}
 ```
 
 ### Create instance
@@ -21,9 +21,9 @@ composer require router/slim
 use \Cs\Router\Util\App as Router;
 
 $app = new Router(
-            $slim, $containerServices,
-            $routes, $cors -> [array] optional
-        );
+    $containerServices,
+    $routes, $cors -> [array] optional
+);
 $app->run();
 ```
 
@@ -33,51 +33,52 @@ $app->run();
 ### Create a routes as below and send the routes as array.
 ```
 -
-  url: /test[/{return}] json|raw|download (optional. Default is raw)
+  url: /test[/{return}] (optional)
   method: get|post|put|head|delete
   routeBeforeInvoke:
     - [class]->[function]
     ...
   invoke: [class]->[function]
+  return: json|raw|download (*optional)
 ```
 * **`url`** is the path of route
 * **`method`** is http method like get|post. you can specify it either small or caps
 * **`routeBeforeInvoke`** is a special routing like middleware(optional). this is will be invoked before actual method call and the response will to forwared with method|function name as **`array`**.
 * **`invoke`** is callback placeholder. *`class`* is a service name and *`function`* is callback method. If you were using DI container then provide full path of the service name.
-* **`[/{return}]`** is how response body would be. *`json`* will return response as *`json`*, *`raw`* will return the text body, *`download`* will force the response as downloadable stream.
-* if you specified return is *`download`* and your response body should be like blow
+* **`[/{return}]`** is a optional routing, which is used to return a response as *`json`* , *`raw`*, *`download`*. You can specify it either uri routing or explicitly in array as mentioned above.
+* *`download`* is will force the response as downloadable request. Note* its return values should be like below in the response section.
 
 ***
 ### Your service Response should like below
 ***
 
-##### Response body -> `Download` 
-**Note**: Response should be in a array.
+##### If return type is `Download` then the method response should be Array like below
 ```
 [
-  'file' => filestream,
-  'fileSize' => sizeoffile,
+  'file' => File Content,
+  'fileSize' => File Size,
   'ContentType' => mime,
-  'fileName' => in what name it should to streamed as response,
+  'fileName' => FileName (in what name it should be downloaded),
   'statusCode' => integer (optional)
 ]
 ```
 
-##### Response body -> `json`
+##### If return type is `Download` then the method response should be array like below
 ```
 [
   'statusCode' => integer (optional),
-  'data' => data [array|string]
+  'data' => data [array]
 ]
 ```
 
-##### Response body -> `raw`
+##### If return type is `raw` then the method response should be a string like below
 ```
-  'statusCode' -> (string)
+  'response' -> (string)
 ```
 
-#### Example
+#### Example 1
 ```
+##### specified, routing level return type & routeBeforeIvoke is a kind of middleware it should be called before actual routing method and their reponses are returned in their own method name.
 -
   url: /test[/{return}]
   routeBeforeInvoke:
@@ -85,6 +86,13 @@ $app->run();
     - test->Validate2
   method: post
   invoke: test->welcome
+  return: json
+
+req -> /test/json
+  * test->Validate get called returns ['Validate' => [response]]
+  * test->Validate get called returns  ['Validate' => [response], 'Validate2' => [response]]
+  * test->welcome finally called your responses and it should be array of thing bcz, return type is specified as json * [/{return}] -> json * 
+  Note* static return type will be overrided by dynamic routing (URI routing).
 -
   url: /test/{token}[/{return}]
   method: get
