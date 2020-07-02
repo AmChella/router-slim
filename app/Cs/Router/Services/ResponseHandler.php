@@ -67,7 +67,8 @@ Class ResponseHandler extends Assert {
         $this->arrayKeyExists('fileName', $result, 'fileName.not.found');
         $this->arrayKeyExists('fileSize', $result, 'fileSize.not.found');
 
-        $response = $this->body
+        return $this->body
+            ->withHeader('Access-Control-Expose-Headers', 'Content-name')
             ->withHeader('Content-Description', 'File Download')
             ->withHeader('Content-Type', $result['contentType'])
             ->withHeader(
@@ -77,11 +78,9 @@ Class ResponseHandler extends Assert {
             ->withHeader('Expires', '0')
             ->withHeader('Cache-Control', 'must-revalidate')
             ->withHeader('Pragma', 'public')
-            ->withHeader('Content-Length', $result['fileSize']);
-
-            echo $result['file'];
-
-        return $response;
+            ->withHeader('Content-Length', $result['fileSize'])
+            ->withHeader('Content-name', basename($result['fileName']))
+            ->write($result['file']);
     }
 
     /**
