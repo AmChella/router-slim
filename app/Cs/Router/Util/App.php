@@ -6,6 +6,7 @@ use Cs\Router\Services\Cors;
 use Cs\Router\Services\RequestHandler;
 use Cs\Router\Services\ResponseHandler;
 use Slim\Factory\AppFactory;
+use Cs\Exception\InvalidRoutes;
 
 /**
  * @category Router_Package_For_Slim_3
@@ -33,8 +34,15 @@ Class App extends RequestHandler {
 
     private function initApp($slim, Array $settings): Void {
         $this->app = AppFactory::create();
-        $this->debug = array_key_exists('debug', $settings) === true ? 
+        $this->debug = array_key_exists('debug', $settings) === true ?
         $settings['debug'] === 1 ? true : false : false;
+        $this->app->addRoutingMiddleware();
+        // Add Error Middleware
+        $errorMiddleware = $this->app->addErrorMiddleware(true, true, true);
+
+        // Get the default error handler and register my custom error renderer.
+        $errorHandler = $errorMiddleware->getDefaultErrorHandler();
+        $errorHandler->registerErrorRenderer('application/json', InvalidRoutes::class);
     }
 
     private function setCors($cors): Void {
