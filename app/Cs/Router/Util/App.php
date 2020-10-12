@@ -40,9 +40,11 @@ Class App extends RequestHandler {
         // Add Error Middleware
         $errorMiddleware = $this->app->addErrorMiddleware(true, true, true);
 
-        // Get the default error handler and register my custom error renderer.
-        $errorHandler = $errorMiddleware->getDefaultErrorHandler();
-        $errorHandler->registerErrorRenderer('application/json', InvalidRoutes::class);
+        if ($settings['debug'] === true) {
+            // Get the default error handler and register my custom error renderer.
+            $errorHandler = $errorMiddleware->getDefaultErrorHandler();
+            $errorHandler->registerErrorRenderer('application/json', InvalidRoutes::class);
+        }
     }
 
     private function setCors($cors): Void {
