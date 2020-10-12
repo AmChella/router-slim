@@ -106,7 +106,7 @@ Class RequestHandler extends Assert {
                 if ($e->getCode()) {
                     $result['statusCode'] = $e->getCode();
                 }
-                $result['message'] = 'something.went.wrong';
+                $result['message'] = $e->getMessage();
                 if ($instance->debug === true) {
                     $result['trace'] = $e->getTraceAsString();
                     $result['message'] = $e->getMessage();
