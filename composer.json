@@ -2,7 +2,6 @@
     "name": "router/slim",
     "description": "Slim Router",
     "type": "application",
-    "version": "v0.0.6.2",
     "keywords": ["slim", "router", "framework"],
     "homepage": "https://github.com/AmChella/router-slim",
     "license": "MIT",
