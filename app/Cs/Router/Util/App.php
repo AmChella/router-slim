@@ -6,7 +6,9 @@ use Cs\Router\Services\Cors;
 use Cs\Router\Services\RequestHandler;
 use Cs\Router\Services\ResponseHandler;
 use Slim\Factory\AppFactory;
-use Cs\Exception\InvalidRoutes;
+use Slim\Http\Response;
+use Slim\Exception\HttpNotFoundException;
+use Slim\Exception\HttpMethodNotAllowedException;
 
 /**
  * @category Router_Package_For_Slim_3
@@ -34,17 +36,8 @@ Class App extends RequestHandler {
 
     private function initApp($slim, Array $settings): Void {
         $this->app = AppFactory::create();
-        $this->debug = array_key_exists('debug', $settings) === true ?
+        $this->debug = array_key_exists('debug', $settings) === true ? 
         $settings['debug'] === 1 ? true : false : false;
-        $this->app->addRoutingMiddleware();
-        // Add Error Middleware
-        $errorMiddleware = $this->app->addErrorMiddleware(true, true, true);
-
-        if ($settings['debug'] === true) {
-            // Get the default error handler and register my custom error renderer.
-            $errorHandler = $errorMiddleware->getDefaultErrorHandler();
-            $errorHandler->registerErrorRenderer('application/json', InvalidRoutes::class);
-        }
     }
 
     private function setCors($cors): Void {
@@ -55,10 +48,29 @@ Class App extends RequestHandler {
         try {
             $this->routeToService($this->routes);
             $this->app->run();
-        } catch (\Exception $e) {
-            $statusCode = $e->getCode();
-            $traceMessage = $e->getTraceAsString();
-            throw new Exception($traceMessage, $statusCode);
+        } catch(HttpMethodNotAllowedException|HttpNotFoundException $e) {
+            $errorCode = $e->getCode();
+            $traceMessage = $e->getMessage();
+            $result = [
+                'error' => sprintf("Routing not found or %s", $traceMessage),
+                'errorId' => $errorCode,
+                'status' => false
+            ];
+            header("Content-Type: application/json");
+            http_response_code(404);
+            echo json_encode($result);
+        } 
+        catch (\Exception $e) {
+            $errorCode = $e->getCode();
+            $traceMessage = $e->getMessage();
+            $result = [
+                'error' => $traceMessage,
+                'errorId' => $errorCode,
+                'status' => false
+            ];
+            header("Content-Type: application/json");
+            http_response_code(500);
+            echo json_encode($result);
         }
     }
 }

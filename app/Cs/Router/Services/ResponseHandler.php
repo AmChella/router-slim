@@ -44,11 +44,7 @@ Class ResponseHandler extends Assert {
     private function getJsonResponse(Array $result, $statusCode = 200) {
         $this->isEmpty($result, 'empty.result.given');
         $data = $result;
-        $data['status'] = $this->getStatus($statusCode);
-        //overriding status if status key found in result. 
-        if (\array_key_exists('status', $result) === true) {
-            $data['status'] = $result['status'];
-        }
+        $data['success'] = $this->getStatus($statusCode);
 
         return $this->body->withJson($data)->withStatus($statusCode);
     }
@@ -67,8 +63,7 @@ Class ResponseHandler extends Assert {
         $this->arrayKeyExists('fileName', $result, 'fileName.not.found');
         $this->arrayKeyExists('fileSize', $result, 'fileSize.not.found');
 
-        return $this->body
-            ->withHeader('Access-Control-Expose-Headers', 'Content-name')
+        $response = $this->body
             ->withHeader('Content-Description', 'File Download')
             ->withHeader('Content-Type', $result['contentType'])
             ->withHeader(
@@ -78,9 +73,11 @@ Class ResponseHandler extends Assert {
             ->withHeader('Expires', '0')
             ->withHeader('Cache-Control', 'must-revalidate')
             ->withHeader('Pragma', 'public')
-            ->withHeader('Content-Length', $result['fileSize'])
-            ->withHeader('Content-name', basename($result['fileName']))
-            ->write($result['file']);
+            ->withHeader('Content-Length', $result['fileSize']);
+
+            echo $result['file'];
+
+        return $response;
     }
 
     /**

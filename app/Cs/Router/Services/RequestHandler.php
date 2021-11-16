@@ -106,7 +106,7 @@ Class RequestHandler extends Assert {
                 if ($e->getCode()) {
                     $result['statusCode'] = $e->getCode();
                 }
-                $result['message'] = $e->getMessage();
+                $result['message'] = 'something.went.wrong';
                 if ($instance->debug === true) {
                     $result['trace'] = $e->getTraceAsString();
                     $result['message'] = $e->getMessage();
@@ -114,7 +114,7 @@ Class RequestHandler extends Assert {
 
                 return \call_user_func(
                     [$instance->responseHandler, 'setResponse'],
-                    $response, $result, 'json'
+                    $response, $result, $returnMode
                 );
             }
         };
