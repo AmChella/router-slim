@@ -62,9 +62,11 @@ Class App extends RequestHandler {
         } 
         catch (\Exception $e) {
             $errorCode = $e->getCode();
-            $traceMessage = $e->getMessage();
+            $traceMessage = $e->getTraceAsString();
+            $errorMessage = $e->getMessage();
             $result = [
                 'error' => $traceMessage,
+                'message' => $errorMessage,
                 'errorId' => $errorCode,
                 'status' => false
             ];

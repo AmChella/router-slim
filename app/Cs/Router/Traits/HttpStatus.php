@@ -13,7 +13,11 @@ Trait HttpStatus {
             $this->isNumber(
                 $result['statusCode'], 'status.code.should.be.an.integer'
             );
+
             $code = $result['statusCode'];
+            if ($result['statusCode'] > 599) {
+                $code = 500;
+            }
         }
 
         return $code;
