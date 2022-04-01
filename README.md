@@ -218,5 +218,10 @@ catch(Exception $e) {
 }
 ```
 
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/amchella/router-slim.svg)](https://starchart.cc/amchella/router-slim)
+
+
 ### Here you go!
 &#9786; Happy routing
