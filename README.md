@@ -4,6 +4,7 @@
 [![Total Downloads](https://poser.pugx.org/router/slim/downloads?format=flat-square)](https://packagist.org/packages/router/slim)
 [![Latest Unstable Version](https://poser.pugx.org/router/slim/v/unstable?format=flat-square)](https://packagist.org/packages/router/slim)
 [![License](https://poser.pugx.org/router/slim/license?format=flat-square)](https://packagist.org/packages/router/slim)
+[![PHP Composer & unit test](https://github.com/AmChella/router-slim/actions/workflows/ci.yml/badge.svg)](https://github.com/AmChella/router-slim/actions/workflows/ci.yml)
 
 application with Slim Framework
 
