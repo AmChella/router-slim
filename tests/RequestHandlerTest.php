@@ -5,8 +5,8 @@ use Cs\Router\Util\Assert;
 use Cs\Router\Services\RequestHandler;
 use Cs\Router\Exception\InvalidRoute;
 
-class RequestHanderTest extends TestCase {
-    public function setUp() {
+class RequestHandlerTest extends TestCase {
+    public function setUp(): void {
         $this->mcValidateRoute = $this->getMockBuilder(RequestHandler::Class)
         ->setMethods(['validateServiceHasValidCallback'])
         ->getMock();
