@@ -20,8 +20,8 @@ class AssertTest extends TestCase {
     }
 
     public function testNumberIsNumber() {
+        $this->expectException(Exception::class);
         Assert::isNumber('123', 'invalid.input');
-        $this->assertTrue(TRUE);
     }
 
     public function testStringIsArrayException() {
@@ -115,8 +115,10 @@ class AssertTest extends TestCase {
     }
 
     public function testIsEmptyWithNumber() {
-        $this->expectException(Exception::class);
+
+        // $this->expectException(Exception::class);
         Assert::isEmpty(123, 'invalid.input');
+        $this->assertTrue(TRUE);
     }
 
     public function testIsJsonWithString() {

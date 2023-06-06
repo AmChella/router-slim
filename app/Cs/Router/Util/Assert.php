@@ -7,8 +7,12 @@ use \Exception;
 Abstract Class Assert {
 
     public static function isNumber($number, $message): Void {
+        if (!self::isArray($number, $message)) {
+            throw new Exception($message);
+        }
+
         self::isEmpty($number, $message);
-        if (preg_match('/[^0-9]/', $number)) {
+        if (!preg_match('/[^0-9]/', $number)) {
             throw new Exception($message);
         }
     }

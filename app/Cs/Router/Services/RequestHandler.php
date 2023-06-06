@@ -47,7 +47,7 @@ Class RequestHandler extends Assert {
      * @return Void
      */
     public function validateRoute(Array $route): Void {
-        $this->isHashArray($route, 'route.is.not.an.array');
+        $this->isHashArray($route, 'route.is.not.a.associate.array');
         $this->isArrayKeyExist('invoke', $route, 'invoke.key.not.found');
         $this->isArrayKeyExist('url', $route, 'uri.not.found');
         $this->isArrayKeyExist('method', $route, 'method.not.found');
